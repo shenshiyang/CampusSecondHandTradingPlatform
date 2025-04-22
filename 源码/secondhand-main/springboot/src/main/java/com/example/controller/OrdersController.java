@@ -114,5 +114,10 @@ public class OrdersController {
         return Result.success(dictList);
     }
 
+    @GetMapping("/selectCategorySalesCount")
+    public Result selectCategorySalesCount() {
+        List<Dict> list = ordersService.selectCategorySalesCount();
+        return Result.success(list);
+    }
 
 }

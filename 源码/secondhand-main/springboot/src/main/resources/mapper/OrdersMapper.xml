@@ -99,4 +99,13 @@
         where order_no = #{orderNo}
     </update>
 
+    <select id="selectCategorySalesCount" resultType="cn.hutool.core.lang.Dict">
+        SELECT g.category AS name, COUNT(*) AS value
+        FROM orders o
+            LEFT JOIN goods g ON o.goods_id = g.id
+        WHERE o.status = '已完成'
+        GROUP BY g.category
+    </select>
+
+
 </mapper>

@@ -1,5 +1,6 @@
 package com.example.mapper;
 
+import cn.hutool.core.lang.Dict;
 import com.example.entity.Orders;
 import org.apache.ibatis.annotations.Select;
 
@@ -34,6 +35,9 @@ public interface OrdersMapper {
      * 查询所有
      */
     List<Orders> selectAll(Orders orders);
+
+    List<Dict> selectCategorySalesCount();
+
 
     @Select("select * from orders where order_no = #{orderNo}")
     Orders selectByOrderNo(String orderNo);

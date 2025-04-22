@@ -6,12 +6,15 @@ import com.example.common.Result;
 import com.example.common.enums.ResultCodeEnum;
 import com.example.common.enums.RoleEnum;
 import com.example.entity.Account;
+import com.example.entity.LoginLog;
 import com.example.exception.CustomException;
 import com.example.service.AdminService;
+import com.example.service.LoginLogService;
 import com.example.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 
 /**
  * 基础前端接口
@@ -23,6 +26,8 @@ public class WebController {
     private AdminService adminService;
     @Resource
     UserService userService;
+    @Resource
+    private LoginLogService loginLogService;
 
     @GetMapping("/")
     public Result hello() {
@@ -45,6 +50,12 @@ public class WebController {
         } else {
             throw new CustomException(ResultCodeEnum.PARAM_LOST_ERROR);
         }
+
+        LoginLog log = new LoginLog();
+        log.setUserId(account.getId().longValue());
+        log.setLoginTime(LocalDateTime.now());
+        loginLogService.insert(log);
+
         return Result.success(account);
     }
 

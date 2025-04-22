@@ -208,4 +208,9 @@ public class OrdersService {
 
         return dictList;
     }
+
+    public List<Dict> selectCategorySalesCount() {
+        return ordersMapper.selectCategorySalesCount();
+    }
+
 }

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mapper.LoginLogMapper">
+
+    <!-- 插入登录日志 -->
+    <insert id="insert" parameterType="com.example.entity.LoginLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO login_log (user_id, login_time, ip_address, user_agent)
+        VALUES (#{userId}, #{loginTime}, #{ipAddress}, #{userAgent})
+    </insert>
+    <!-- 查询每日登录人数 -->
+    <select id="selectLoginTrend" resultType="map">
+        SELECT DATE(login_time) AS date, COUNT(DISTINCT user_id) AS count
+        FROM login_log
+        WHERE login_time BETWEEN #{start} AND #{end}
+        GROUP BY DATE(login_time)
+        ORDER BY date ASC
+    </select>
+
+</mapper>
+

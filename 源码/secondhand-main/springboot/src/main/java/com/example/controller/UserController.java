@@ -1,7 +1,9 @@
 package com.example.controller;
 
+import cn.hutool.core.lang.Dict;
 import com.example.common.Result;
 import com.example.entity.User;
+import com.example.service.LoginLogService;
 import com.example.service.UserService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.web.bind.annotation.*;
@@ -84,4 +86,14 @@ public class UserController {
         return Result.success(page);
     }
 
+    @Resource
+    private LoginLogService loginLogService;
+
+
+    @GetMapping("/selectOnlineTrend")
+    public Result selectOnlineTrend() {
+        List<Dict> trendData = loginLogService.getOnlineTrend();
+        return Result.success(trendData);
+
+    }
 }
