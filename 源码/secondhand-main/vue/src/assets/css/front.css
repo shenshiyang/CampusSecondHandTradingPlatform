@@ -1,0 +1,120 @@
+/* ========== 公告栏样式 ========== */
+.front-notice {
+    height: 30px;
+    line-height: 30px;
+    padding: 0 20px;
+    color: #666;
+    font-size: 12px;
+    background-color: #f1f1f1;
+  }
+  
+  /* ========== 头部整体结构 ========== */
+  .front-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 64px;
+    padding: 0 20px;
+    background: #033fbb;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* ========== 左侧 logo ========== */
+  .front-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .front-header-left img {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+  }
+  
+  .front-header-left img:hover {
+    transform: scale(1.05);
+  }
+  
+  .front-header-left .title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+  }
+  
+  /* ========== 中间菜单栏 ========== */
+  .front-header-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+  }
+  
+  .front-header-center .menu {
+    color: #eee;
+    font-size: 16px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+  
+  .front-header-center .menu:hover,
+  .front-header-center .menu-active {
+    color: #ffd04b;
+  }
+  
+  /* ========== 右侧用户区域 ========== */
+  .front-header-right {
+    width: 180px;
+    text-align: right;
+  }
+  
+  .front-header-dropdown {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  
+  .front-header-dropdown img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+  }
+  
+  .front-header-dropdown img:hover {
+    transform: scale(1.08);
+  }
+  
+  /* ========== Element UI 的覆盖 ========== */
+  .el-dropdown-menu {
+    width: 120px !important;
+    text-align: center !important;
+  }
+  
+  .el-dropdown-menu__item {
+    font-size: 14px;
+  }
+  
+  /* ========== 页面主体内容 ========== */
+  .main-content {
+    width: 100%;
+  }
+  
+  .main-body {
+    min-height: calc(100vh - 64px - 60px); /* header + footer 高度预留 */
+    padding: 20px;
+    background-color: #fff;
+    box-sizing: border-box;
+  }
+  
+  /* ========== Element UI 横向菜单适配 ========== */
+  .el-menu.el-menu--horizontal {
+    border: none !important;
+    height: 59px;
+    background-color: transparent;
+  }
+  
