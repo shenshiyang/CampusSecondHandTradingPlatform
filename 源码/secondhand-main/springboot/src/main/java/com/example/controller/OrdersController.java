@@ -90,8 +90,8 @@ public class OrdersController {
      */
     @GetMapping("/selectSalePage")
     public Result selectSalePage(Orders orders,
-                             @RequestParam(defaultValue = "1") Integer pageNum,
-                             @RequestParam(defaultValue = "10") Integer pageSize) {
+                                 @RequestParam(defaultValue = "1") Integer pageNum,
+                                 @RequestParam(defaultValue = "10") Integer pageSize) {
         PageInfo<Orders> page = ordersService.selectSalePage(orders, pageNum, pageSize);
         return Result.success(page);
     }
@@ -118,6 +118,21 @@ public class OrdersController {
     public Result selectCategorySalesCount() {
         List<Dict> list = ordersService.selectCategorySalesCount();
         return Result.success(list);
+    }
+
+    @GetMapping("/todayTotal")
+    public Result todayTotal() {
+        return Result.success(ordersService.getTodaySalesTotal());
+    }
+
+    @GetMapping("/todayCount")
+    public Result todayCount() {
+        return Result.success(ordersService.getTodayOrderCount());
+    }
+
+    @GetMapping("/lineWithCount")
+    public Result lineWithCount() {
+        return Result.success(ordersService.selectLineWithCount());
     }
 
 }

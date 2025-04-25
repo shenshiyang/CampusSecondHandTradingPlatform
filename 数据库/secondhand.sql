@@ -11,7 +11,7 @@
  Target Server Version : 80040 (8.0.40)
  File Encoding         : 65001
 
- Date: 22/04/2025 11:07:39
+ Date: 24/04/2025 21:15:01
 */
 
 SET NAMES utf8mb4;
@@ -291,10 +291,10 @@ INSERT INTO `goods` VALUES (1, '苹果 iPhone 13 Pro Max', 5000.00, '<h3>商品�
 INSERT INTO `goods` VALUES (3, '苹果 iPhone 13', 4000.00, '<h3>商品概述</h3><p>这是一部经过精心保养的二手iPhone 13 Pro Max，外观成色良好，无明显划痕或磨损。设备功能正常，所有硬件组件均处于良好的工作状态。这部手机已解锁，可兼容任何运营商网络。我正在寻找一位对这款设备感兴趣的买家，希望它能带给您同样出色的体验。</p><h3>设备状况</h3><ul><li><strong>屏幕</strong>：无裂纹或刮痕，显示清晰明亮。</li><li><strong>背面及边框</strong>：轻微使用痕迹，不影响整体美观。</li><li><strong>摄像头</strong>：拍摄效果出色，无模糊或损坏。</li><li><strong>电池健康度</strong>：超过80%，剩余寿命充足。</li><li><strong>软件</strong>：运行 iOS 15.x 版本，无越狱或其他非法操作。</li><li><strong>配件</strong>：附带原装充电线和适配器（如有）</li></ul><h3>交易说明</h3><ul><li><strong>价格</strong>：由于是二手商品，价格比全新版本优惠很多。</li><li><strong>保修期</strong>：无官方保修，但我会提供一周内无理由退换货保障。</li><li><strong>支付方式</strong>：支持支付宝、微信支付等多种付款方式。</li><li><strong>配送</strong>：全国包邮，采用顺丰快递，确保安全送达。</li></ul>', '北京市朝阳区', 'http://localhost:9090/files/1727057665712-Snipaste_2024-09-23_10-14-17.png', '2025-04-01 00:00:00', '通过', '电子产品', 1, '上架', 16, NULL, NULL, 0, 0, 0, 0, 6);
 INSERT INTO `goods` VALUES (4, '二手Apple AirPods Pro无线耳机', 500.00, '<p># Apple AirPods Pro 无线蓝牙耳机\n\n- **品牌**：Apple\n- **型号**：AirPods Pro\n- **颜色**：白色\n- **成色**：九五成新\n- **功能**：主动降噪、透明模式、触摸控制、防水防汗\n- **配件**：充电盒、耳塞（S/M/L三副）、数据线\n\n这款AirPods Pro是我去年购买的，一直很爱惜，几乎每天都用，但由于最近换了新款，所以打算出掉。耳机没有任何损伤，音质和降噪效果都非常棒。充电盒电量足，续航持久。\n\n![AirPods Pro实物图]()\n\n价格可小刀，有意者私聊，非诚勿扰。支持当面交易或者邮寄，运费自理。<br/></p>', '北京市朝阳区', 'http://localhost:9090/files/1727058824743-Snipaste_2024-09-23_10-33-36.png', '2025-04-01 00:00:00', '通过', '电子产品', 2, '上架', 17, NULL, NULL, 0, 0, 0, 0, 7);
 INSERT INTO `goods` VALUES (5, '二手Apple AirPods无线耳机', 400.00, '<p># Apple AirPods Pro 无线蓝牙耳机\n\n- **品牌**：Apple\n- **型号**：AirPods Pro\n- **颜色**：白色\n- **成色**：九五成新\n- **功能**：主动降噪、透明模式、触摸控制、防水防汗\n- **配件**：充电盒、耳塞（S/M/L三副）、数据线\n\n这款AirPods Pro是我去年购买的，一直很爱惜，几乎每天都用，但由于最近换了新款，所以打算出掉。耳机没有任何损伤，音质和降噪效果都非常棒。充电盒电量足，续航持久。\n\n![AirPods Pro实物图]()\n\n价格可小刀，有意者私聊，非诚勿扰。支持当面交易或者邮寄，运费自理。<br/></p>', '北京市朝阳区', 'http://localhost:9090/files/1727058824743-Snipaste_2024-09-23_10-33-36.png', '2025-04-01 00:00:00', '通过', '电子产品', 2, '上架', 32, NULL, NULL, 0, 0, 0, 0, 9);
-INSERT INTO `goods` VALUES (7, '龙族', 58.00, '', '南昌大学前湖校区天健园27栋', 'http://localhost:9090/files/1744299023812-IMG_1536.JPG', '2025-04-10 00:00:00', '通过', '书籍', 1, '上架', 25, NULL, NULL, 0, 0, 0, 0, 2);
+INSERT INTO `goods` VALUES (7, '龙族', 58.00, '', '南昌大学前湖校区天健园27栋', 'http://localhost:9090/files/1744299023812-IMG_1536.JPG', '2025-04-10 00:00:00', '通过', '书籍', 1, '上架', 26, NULL, NULL, 0, 0, 0, 0, 1);
 INSERT INTO `goods` VALUES (8, '大疆pocket3', 2888.00, '<p>推荐自提</p>', '南昌大学前湖校区', 'http://localhost:9090/files/1744336831286-ab9b91538fe65eb8.jpg', '2025-04-11 00:00:00', '通过', '电子产品', 8, '上架', 61, NULL, NULL, 0, 0, 0, 0, 1);
-INSERT INTO `goods` VALUES (9, '大疆', 1213.00, '', '南昌大学', 'http://localhost:9090/files/1744338698282-OIP.jpg', '2025-04-11 00:00:00', '通过', '电子产品', 2, '上架', 39, NULL, NULL, 0, 0, 0, 0, 1);
-INSERT INTO `goods` VALUES (10, '狗屁王二代', 288.00, '<p>99新，可以送货上门</p>', '南昌大学前湖校区天健园19栋', 'http://localhost:9090/files/1745204069678-OIP (1).jpg', '2025-04-21 00:00:00', '待审核', '电子产品', 9, '上架', 0, NULL, NULL, 0, 0, 0, 0, 9);
+INSERT INTO `goods` VALUES (9, '大疆', 1213.00, '', '南昌大学', 'http://localhost:9090/files/1744338698282-OIP.jpg', '2025-04-11 00:00:00', '通过', '电子产品', 2, '上架', 40, NULL, NULL, 0, 0, 0, 0, 2);
+INSERT INTO `goods` VALUES (10, '狗屁王二代', 288.00, '<p>99新，可以送货上门</p>', '南昌大学前湖校区天健园19栋', 'http://localhost:9090/files/1745204069678-OIP (1).jpg', '2025-04-21 00:00:00', '通过', '电子产品', 9, '上架', 1, NULL, NULL, 0, 0, 0, 0, 9);
 
 -- ----------------------------
 -- Table structure for help
@@ -344,6 +344,29 @@ INSERT INTO `likes` VALUES (29, 9, 9, 'goods');
 INSERT INTO `likes` VALUES (31, 8, 9, 'goods');
 
 -- ----------------------------
+-- Table structure for login_log
+-- ----------------------------
+DROP TABLE IF EXISTS `login_log`;
+CREATE TABLE `login_log`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `login_time` datetime NOT NULL COMMENT '登录时间',
+  `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '登录IP',
+  `user_agent` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'User-Agent 信息',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_login_time`(`login_time` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of login_log
+-- ----------------------------
+INSERT INTO `login_log` VALUES (1, 1, '2025-04-22 17:39:15', '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0');
+INSERT INTO `login_log` VALUES (2, 7, '2025-04-22 21:13:49', NULL, NULL);
+INSERT INTO `login_log` VALUES (3, 7, '2025-04-22 21:14:03', NULL, NULL);
+INSERT INTO `login_log` VALUES (4, 2, '2025-04-21 21:16:09', NULL, NULL);
+INSERT INTO `login_log` VALUES (5, 2, '2025-04-19 21:16:26', NULL, NULL);
+
+-- ----------------------------
 -- Table structure for notice
 -- ----------------------------
 DROP TABLE IF EXISTS `notice`;
@@ -384,22 +407,22 @@ CREATE TABLE `orders`  (
   `sale_id` int NULL DEFAULT NULL,
   `goods_id` int NOT NULL COMMENT '商品id',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 66 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 68 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of orders
 -- ----------------------------
-INSERT INTO `orders` VALUES (41, '大疆pocket3', 'http://localhost:9090/files/1744336831286-ab9b91538fe65eb8.jpg', '17451647366916784600', 2888.00, '2025-04-20 23:58:56', NULL, NULL, 7, '南昌大学', '1213', NULL, '已取消', 8, 8);
-INSERT INTO `orders` VALUES (42, '大疆pocket3', 'http://localhost:9090/files/1744336831286-ab9b91538fe65eb8.jpg', '17451652582029470568', 2888.00, '2025-04-21 00:07:38', NULL, NULL, 7, '南昌大学', '1213', NULL, '已取消', 8, 8);
-INSERT INTO `orders` VALUES (43, '大疆pocket3', 'http://localhost:9090/files/1744336831286-ab9b91538fe65eb8.jpg', '17451654182065303526', 2888.00, '2025-04-21 00:10:18', NULL, NULL, 7, '南昌大学', '1213', NULL, '已取消', 8, 8);
-INSERT INTO `orders` VALUES (44, '大疆pocket3', 'http://localhost:9090/files/1744336831286-ab9b91538fe65eb8.jpg', '17451654915111589819', 2888.00, '2025-04-21 00:11:31', NULL, NULL, 7, '南昌大学', '1213', NULL, '已取消', 8, 8);
+INSERT INTO `orders` VALUES (41, '大疆pocket3', 'http://localhost:9090/files/1744336831286-ab9b91538fe65eb8.jpg', '17451647366916784600', 2888.00, '2025-04-20 23:58:56', NULL, NULL, 7, '南昌大学', '1213', NULL, '已完成', 8, 8);
+INSERT INTO `orders` VALUES (42, '大疆pocket3', 'http://localhost:9090/files/1744336831286-ab9b91538fe65eb8.jpg', '17451652582029470568', 2888.00, '2025-04-21 00:07:38', NULL, NULL, 7, '南昌大学', '1213', NULL, '已完成', 8, 8);
+INSERT INTO `orders` VALUES (43, '大疆pocket3', 'http://localhost:9090/files/1744336831286-ab9b91538fe65eb8.jpg', '17451654182065303526', 2888.00, '2025-04-21 00:10:18', NULL, NULL, 7, '南昌大学', '1213', NULL, '已完成', 8, 8);
+INSERT INTO `orders` VALUES (44, '大疆pocket3', 'http://localhost:9090/files/1744336831286-ab9b91538fe65eb8.jpg', '17451654915111589819', 2888.00, '2025-04-21 00:11:31', NULL, NULL, 7, '南昌大学', '1213', NULL, '已完成', 8, 8);
 INSERT INTO `orders` VALUES (45, '大疆pocket3', 'http://localhost:9090/files/1744336831286-ab9b91538fe65eb8.jpg', '17451656285616824945', 2888.00, '2025-04-21 00:13:48', NULL, NULL, 7, '南昌大学', '1213', NULL, '已取消', 8, 8);
 INSERT INTO `orders` VALUES (46, '龙族', 'http://localhost:9090/files/1744299023812-IMG_1536.JPG', '17451660326254129838', 58.00, '2025-04-21 00:20:32', NULL, NULL, 7, '南昌大学', '1213', NULL, '已取消', 1, 7);
 INSERT INTO `orders` VALUES (47, '大疆pocket3', 'http://localhost:9090/files/1744336831286-ab9b91538fe65eb8.jpg', '17451673604603740758', 2888.00, '2025-04-21 00:42:40', NULL, NULL, 1, '江西省红谷滩区', '18634208045', NULL, '已取消', 8, 8);
 INSERT INTO `orders` VALUES (48, '大疆pocket3', 'http://localhost:9090/files/1744336831286-ab9b91538fe65eb8.jpg', '17451674328314544856', 2888.00, '2025-04-21 00:43:52', NULL, NULL, 1, '江西省红谷滩区', '18634208045', NULL, '已取消', 8, 8);
-INSERT INTO `orders` VALUES (49, '大疆pocket3', 'http://localhost:9090/files/1744336831286-ab9b91538fe65eb8.jpg', '17451674636316944276', 2888.00, '2025-04-21 00:44:23', NULL, NULL, 1, '江西省红谷滩区', '18634208045', NULL, '待支付', 8, 8);
+INSERT INTO `orders` VALUES (49, '大疆pocket3', 'http://localhost:9090/files/1744336831286-ab9b91538fe65eb8.jpg', '17451674636316944276', 2888.00, '2025-04-21 00:44:23', NULL, NULL, 1, '江西省红谷滩区', '18634208045', NULL, '已完成', 8, 8);
 INSERT INTO `orders` VALUES (50, '二手Apple AirPods Pro无线耳机', 'http://localhost:9090/files/1727058824743-Snipaste_2024-09-23_10-33-36.png', '17451996083719734562', 500.00, '2025-04-21 09:40:08', NULL, NULL, 9, '南昌大学前湖校区天健园27栋', '123123123', NULL, '已取消', 2, 4);
-INSERT INTO `orders` VALUES (51, '二手Apple AirPods Pro无线耳机', 'http://localhost:9090/files/1727058824743-Snipaste_2024-09-23_10-33-36.png', '17451996768766552332', 500.00, '2025-04-21 09:41:16', '2025042122001419600506105719', '2025-04-21 09:42:22', 9, '南昌大学前湖校区天健园27栋', '123123123', NULL, '待发货', 2, 4);
+INSERT INTO `orders` VALUES (51, '二手Apple AirPods Pro无线耳机', 'http://localhost:9090/files/1727058824743-Snipaste_2024-09-23_10-33-36.png', '17451996768766552332', 500.00, '2025-04-21 09:41:16', '2025042122001419600506105719', '2025-04-21 09:42:22', 9, '南昌大学前湖校区天健园27栋', '123123123', NULL, '已完成', 2, 4);
 INSERT INTO `orders` VALUES (52, '二手Apple AirPods无线耳机', 'http://localhost:9090/files/1727058824743-Snipaste_2024-09-23_10-33-36.png', '17451997729488428468', 400.00, '2025-04-21 09:42:52', NULL, NULL, 9, '南昌大学前湖校区天健园27栋', '123123123', NULL, '已取消', 2, 5);
 INSERT INTO `orders` VALUES (53, '苹果 iPhone 13 Pro Max', 'http://localhost:9090/files/1727057665712-Snipaste_2024-09-23_10-14-17.png', '17452030638053838687', 5000.00, '2025-04-21 10:37:43', NULL, NULL, 9, '南昌大学前湖校区天健园27栋', '123123123', NULL, '已取消', 1, 1);
 INSERT INTO `orders` VALUES (54, '大疆pocket3', 'http://localhost:9090/files/1744336831286-ab9b91538fe65eb8.jpg', '17452421716716093210', 2888.00, '2025-04-21 21:29:31', NULL, NULL, 9, '南昌大学前湖校区天健园27栋', '123123123', NULL, '已取消', 8, 8);
@@ -413,7 +436,9 @@ INSERT INTO `orders` VALUES (61, '苹果 iPhone 13 Pro Max', 'http://localhost:9
 INSERT INTO `orders` VALUES (62, '龙族', 'http://localhost:9090/files/1744299023812-IMG_1536.JPG', '17452460434903548030', 58.00, '2025-04-21 22:34:03', NULL, NULL, 9, '南昌大学前湖校区天健园27栋', '123123123', NULL, '已取消', 1, 7);
 INSERT INTO `orders` VALUES (63, '二手Apple AirPods Pro无线耳机', 'http://localhost:9090/files/1727058824743-Snipaste_2024-09-23_10-33-36.png', '17452462680271858202', 500.00, '2025-04-21 22:37:48', NULL, NULL, 9, '南昌大学前湖校区天健园27栋', '123123123', NULL, '已取消', 2, 4);
 INSERT INTO `orders` VALUES (64, '二手Apple AirPods无线耳机', 'http://localhost:9090/files/1727058824743-Snipaste_2024-09-23_10-33-36.png', '17452464806744115523', 400.00, '2025-04-21 22:41:20', NULL, NULL, 9, '南昌大学前湖校区天健园27栋', '123123123', NULL, '已取消', 2, 5);
-INSERT INTO `orders` VALUES (65, '苹果 iPhone 13', 'http://localhost:9090/files/1727057665712-Snipaste_2024-09-23_10-14-17.png', '17452467334428904227', 4000.00, '2025-04-21 22:45:33', '2025042122001419600506116222', '2025-04-21 22:45:55', 9, '南昌大学前湖校区天健园27栋', '123123123', NULL, '待发货', 1, 3);
+INSERT INTO `orders` VALUES (65, '苹果 iPhone 13', 'http://localhost:9090/files/1727057665712-Snipaste_2024-09-23_10-14-17.png', '17452467334428904227', 4000.00, '2025-04-21 22:45:33', '2025042122001419600506116222', '2025-04-21 22:45:55', 9, '南昌大学前湖校区天健园27栋', '123123123', NULL, '已完成', 1, 3);
+INSERT INTO `orders` VALUES (66, '大疆', 'http://localhost:9090/files/1744338698282-OIP.jpg', '17453224409037932997', 1213.00, '2025-04-22 19:47:20', '2025042222001419600506121819', '2025-04-22 19:47:45', 7, '南昌大学', '1213', NULL, '已完成', 2, 9);
+INSERT INTO `orders` VALUES (67, '龙族', 'http://localhost:9090/files/1744299023812-IMG_1536.JPG', '17453236303815102883', 58.00, '2025-04-22 20:07:10', '2025042222001419600506118730', '2025-04-22 20:07:39', 7, '南昌大学', '1213', NULL, '已完成', 1, 7);
 
 -- ----------------------------
 -- Table structure for posts

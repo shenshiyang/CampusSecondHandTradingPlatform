@@ -213,4 +213,56 @@ public class OrdersService {
         return ordersMapper.selectCategorySalesCount();
     }
 
+    public BigDecimal getTodaySalesTotal() {
+        String today = DateUtil.today(); // 例如：2025-04-25
+        List<Orders> ordersList = ordersMapper.selectAll(null).stream()
+                .filter(o -> OrderStatusEnum.DONE.value.equals(o.getStatus()))
+                .filter(o -> o.getTime() != null && o.getTime().startsWith(today))
+                .collect(Collectors.toList());
+
+        return ordersList.stream()
+                .map(Orders::getTotal)
+                .reduce(BigDecimal::add)
+                .orElse(BigDecimal.ZERO);
+    }
+
+    public Integer getTodayOrderCount() {
+        String today = DateUtil.today(); // 例如 2025-04-25
+        return (int) ordersMapper.selectAll(null).stream()
+                .filter(o -> OrderStatusEnum.DONE.value.equals(o.getStatus()))
+                .filter(o -> o.getTime() != null && o.getTime().startsWith(today))
+                .count();
+    }
+
+    public List<Dict> selectLineWithCount() {
+        List<Orders> ordersList = ordersMapper.selectAll(null).stream()
+                .filter(o -> OrderStatusEnum.DONE.value.equals(o.getStatus()))
+                .collect(Collectors.toList());
+
+        Date date = new Date();
+        DateTime start = DateUtil.offsetDay(date, -8);
+        DateTime end = DateUtil.offsetDay(date, -1);
+        List<DateTime> dateTimes = DateUtil.rangeToList(start, end, DateField.DAY_OF_YEAR);
+        List<String> dateList = dateTimes.stream().map(DateUtil::formatDate).collect(Collectors.toList());
+
+        List<Dict> dictList = new ArrayList<>();
+        for (String day : dateList) {
+            BigDecimal total = ordersList.stream()
+                    .filter(o -> o.getTime() != null && o.getTime().contains(day))
+                    .map(Orders::getTotal)
+                    .reduce(BigDecimal::add)
+                    .orElse(BigDecimal.ZERO);
+            long count = ordersList.stream()
+                    .filter(o -> o.getTime() != null && o.getTime().contains(day))
+                    .count();
+
+            dictList.add(Dict.create()
+                    .set("name", day)
+                    .set("sales", total)
+                    .set("count", count));
+        }
+
+        return dictList;
+    }
+
 }
