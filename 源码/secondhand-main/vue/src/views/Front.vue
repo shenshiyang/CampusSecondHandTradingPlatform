@@ -5,7 +5,7 @@
       <!-- 左侧 LOGO -->
       <a href="/front/home" class="front-header-left">
         <img src="@/assets/imgs/logo.png" class="logo" alt="logo" />
-        <div class="title">校园二手平台</div>
+        <div class="title">前湖集市</div>
       </a>
 
       <!-- 中间菜单 -->
@@ -43,7 +43,7 @@
               <el-dropdown-item @click.native="$router.push('/front/orders')">我的订单</el-dropdown-item>
               <el-dropdown-item @click.native="$router.push('/front/goods')">我的商品</el-dropdown-item>
               <el-dropdown-item @click.native="$router.push('/front/userPosts')">我的发帖</el-dropdown-item>
-              <el-dropdown-item @click.native="$router.push('/front/userHelp')">我的求购</el-dropdown-item>
+              <el-dropdown-item @click.native="$router.push('/front/userHelp')">我的求助</el-dropdown-item>
               <el-dropdown-item @click.native="$router.push('/front/userFeedback')">我的反馈</el-dropdown-item>
               <el-dropdown-item @click.native="$router.push('/front/address')">我的地址</el-dropdown-item>
               <el-dropdown-item @click.native="$router.push('/front/person')">个人信息</el-dropdown-item>

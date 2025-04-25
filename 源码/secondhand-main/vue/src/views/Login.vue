@@ -5,7 +5,7 @@
     </div> -->
     <div style="flex: 1; background-color: #f8f8f8">
       <div style="height: 50px; display: flex; align-items: center; background-color: white; padding-left: 20px">
-        <img src="@/assets/imgs/logo1.png" alt="" style="width: 40px">
+        <img src="@/assets/imgs/logo.png" alt="" style="width: 40px">
         <span style="font-size: 24px; margin-left: 5px">校园二手平台</span>
       </div>
       <div style="height: calc(100vh - 50px); display: flex; align-items: center; justify-content: center">

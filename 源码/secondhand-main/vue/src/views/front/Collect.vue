@@ -1,136 +1,149 @@
 <template>
-  <div style="width: 70%; margin: 10px auto">
+  <div class="collect-page">
+    <!-- ▍批量操作 -->
+    <el-button
+      type="danger"
+      plain
+      size="mini"
+      class="mb10"
+      @click="delBatch"
+    >批量取消收藏</el-button>
 
-    <div style="margin-bottom: 10px">
-      <el-button type="danger" plain @click="delBatch">批量取消收藏</el-button>
-    </div>
+    <!-- ▍收藏列表 -->
+    <el-card shadow="never">
+      <el-table
+        :data="tableData"
+        stripe
+        border
+        highlight-current-row
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="50" align="center" />
 
-    <div class="card">
-      <el-table :data="tableData" stripe  @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" align="center"></el-table-column>
-        <el-table-column prop="goodsName" label="商品名称" show-overflow-tooltip></el-table-column>
-        <el-table-column label="商品图片">
-          <template v-slot="scope">
-            <div style="display: flex; align-items: center">
-              <el-image style="width: 40px; height: 40px;" v-if="scope.row.goodsImg"
-                        :src="scope.row.goodsImg" :preview-src-list="[scope.row.goodsImg]"></el-image>
-            </div>
+        <el-table-column
+          prop="goodsName"
+          label="商品名称"
+          min-width="180"
+          show-overflow-tooltip
+        />
+
+        <el-table-column label="商品图片" width="90" align="center">
+          <template #default="{ row }">
+            <el-image
+              v-if="row.goodsImg"
+              :src="row.goodsImg"
+              :preview-src-list="[row.goodsImg]"
+              style="width:40px;height:40px;border-radius:4px"
+            />
           </template>
         </el-table-column>
-        <el-table-column label="商品链接">
-          <template v-slot="scope">
-            <a :href="'/front/goodsDetail?id=' + scope.row.fid" target="_blank">点击打开</a>
+
+        <el-table-column label="商品链接" width="100" align="center">
+          <template #default="{ row }">
+            <a
+              :href="`/front/goodsDetail?id=${row.fid}`"
+              target="_blank"
+            >查看</a>
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="100" align="center">
-          <template v-slot="scope">
-            <el-button plain type="danger" size="mini" @click=del(scope.row.id)>取消收藏</el-button>
+        <el-table-column label="操作" width="120" align="center">
+          <template #default="{ row }">
+            <el-button
+              size="mini"
+              type="danger"
+              plain
+              @click="del(row.id)"
+            >取消收藏</el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <div style="margin-top: 10px">
-        <el-pagination
-            background
-            @current-change="handleCurrentChange"
-            :current-page="pageNum"
-            :page-sizes="[5, 10, 20]"
-            :page-size="pageSize"
-            layout="total, prev, pager, next"
-            :total="total">
-        </el-pagination>
-      </div>
-    </div>
-
+      <!-- ▍分页 -->
+      <el-pagination
+        class="pager"
+        background
+        :current-page="pageNum"
+        :page-size="pageSize"
+        :total="total"
+        :page-sizes="[5, 10, 20]"
+        layout="total, prev, pager, next"
+        @current-change="handleCurrentChange"
+      />
+    </el-card>
   </div>
 </template>
 
 <script>
 export default {
-  name: "Collect",
+  name: 'Collect',
   data() {
     return {
-      tableData: [],  // 所有的数据
-      pageNum: 1,   // 当前的页码
-      pageSize: 10,  // 每页显示的个数
+      tableData: [],
+      pageNum: 1,
+      pageSize: 10,
       total: 0,
-      title: null,
-      fromVisible: false,
-      form: {},
-      user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
-      rules: {
-        title: [
-          {required: true, message: '请输入标题', trigger: 'blur'},
-        ],
-        content: [
-          {required: true, message: '请输入内容', trigger: 'blur'},
-        ]
-      },
       ids: []
     }
   },
   created() {
-    this.load(1)
+    this.load()
   },
   methods: {
-    del(id) {   // 单个删除
-      this.$confirm('您确定取消收藏吗？', '确认取消收藏', {type: "warning"}).then(response => {
-        this.$request.delete('/collect/delete/' + id).then(res => {
-          if (res.code === '200') {   // 表示操作成功
-            this.$message.success('操作成功')
-            this.load(1)
-          } else {
-            this.$message.error(res.msg)  // 弹出错误的信息
-          }
-        })
-      }).catch(() => {
+    /* ---------- 查询 ---------- */
+    async load(page = this.pageNum) {
+      this.pageNum = page
+      const { code, data, msg } = await this.$request.get('/collect/selectPage', {
+        params: { pageNum: this.pageNum, pageSize: this.pageSize }
       })
-    },
-    handleSelectionChange(rows) {   // 当前选中的所有的行数据
-      this.ids = rows.map(v => v.id)   //  [1,2]
-    },
-    delBatch() {   // 批量删除
-      if (!this.ids.length) {
-        this.$message.warning('请选择数据')
-        return
+      if (code === '200') {
+        this.tableData = data.list
+        this.total = data.total
+      } else {
+        this.$message.error(msg)
       }
-      this.$confirm('您确定批量取消收藏吗？', '确认取消收藏', {type: "warning"}).then(response => {
-        this.$request.delete('/collect/delete/batch', {data: this.ids}).then(res => {
-          if (res.code === '200') {   // 表示操作成功
-            this.$message.success('操作成功')
-            this.load(1)
-          } else {
-            this.$message.error(res.msg)  // 弹出错误的信息
-          }
+    },
+
+    /* ---------- 删除 ---------- */
+    del(id) {
+      this.$confirm('确定取消收藏吗？', '提示', { type: 'warning' })
+        .then(() => this.$request.delete('/collect/delete/' + id))
+        .then(({ code, msg }) => {
+          code === '200' ? (this.$message.success('操作成功'), this.load(1)) : this.$message.error(msg)
         })
-      }).catch(() => {
-      })
+        .catch(() => {})
     },
-    load(pageNum) {  // 分页查询
-      if (pageNum) this.pageNum = pageNum
-      this.$request.get('/collect/selectPage', {
-        params: {
-          pageNum: this.pageNum,
-          pageSize: this.pageSize,
-          title: this.title,
-        }
-      }).then(res => {
-        this.tableData = res.data?.list
-        this.total = res.data?.total
-      })
+    handleSelectionChange(rows) {
+      this.ids = rows.map(v => v.id)
     },
-    reset() {
-      this.title = null
-      this.load(1)
+    delBatch() {
+      if (!this.ids.length) return this.$message.warning('请选择数据')
+      this.$confirm('确认批量取消收藏吗？', '提示', { type: 'warning' })
+        .then(() => this.$request.delete('/collect/delete/batch', { data: this.ids }))
+        .then(({ code, msg }) => {
+          code === '200' ? (this.$message.success('操作成功'), this.load(1)) : this.$message.error(msg)
+        })
+        .catch(() => {})
     },
-    handleCurrentChange(pageNum) {
-      this.load(pageNum)
-    },
+
+    /* ---------- 分页 ---------- */
+    handleCurrentChange(page) {
+      this.load(page)
+    }
   }
 }
 </script>
 
 <style scoped>
-
+.collect-page {
+  width: 70%;
+  margin: 20px auto;
+}
+.mb10 {
+  margin-bottom: 10px;
+}
+.pager {
+  margin-top: 12px;
+  text-align: center;
+}
 </style>

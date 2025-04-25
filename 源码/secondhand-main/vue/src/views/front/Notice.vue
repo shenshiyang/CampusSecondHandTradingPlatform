@@ -1,41 +1,96 @@
 <template>
-  <div style="width: 50%; margin: 10px auto">
-    <div style="border-left: 4px solid #2656b5; margin-bottom: 20px; padding-left: 20px; font-size: 24px">系统公告</div>
-    <div class="card">
-      <el-collapse v-model="activeName" accordion>
-        <el-collapse-item :name="index" v-for="(item, index) in noticeList" :key="item.id">
-          <template slot="title">
-            <strong style="font-size: 18px">{{ item.title }}</strong>  <span style="margin-left: 20px; font-size: 13px">{{ item.time }}</span>
+  <div class="notice-page">
+    <!-- ▍标题 -->
+    <h2 class="page-title">
+      <i class="el-icon-message-solid" /> 系统公告
+    </h2>
+
+    <!-- ▍公告列表 -->
+    <el-card shadow="never">
+      <el-skeleton
+        v-if="loading"
+        :rows="4"
+        animated
+      />
+      <el-collapse
+        v-else
+        v-model="active"
+        accordion
+      >
+        <el-collapse-item
+          v-for="(item, idx) in noticeList"
+          :key="item.id"
+          :name="idx"
+        >
+          <!-- 标题插槽 -->
+          <template #title>
+            <strong class="notice-title">{{ item.title }}</strong>
+            <span class="notice-time">{{ item.time }}</span>
           </template>
-          <div v-html="item.content"></div>
+
+          <!-- 内容 -->
+          <div
+            class="notice-content"
+            v-html="item.content"
+          />
         </el-collapse-item>
       </el-collapse>
-    </div>
+    </el-card>
   </div>
 </template>
 
 <script>
 export default {
-  name: "Notice",
+  name: 'Notice',
   data() {
     return {
-      activeName: 0,
-      noticeList: []
+      noticeList: [],
+      active: 0,
+      loading: false
     }
   },
   created() {
-    this.load()
+    this.fetchNotice()
   },
   methods: {
-    load() {
-      this.$request.get('/notice/selectAll').then(res => {
-        this.noticeList = res.data || []
-      })
+    async fetchNotice() {
+      this.loading = true
+      const { code, data, msg } = await this.$request.get('/notice/selectAll')
+      this.loading = false
+      code === '200'
+        ? (this.noticeList = data || [])
+        : this.$message.error(msg)
     }
   }
 }
 </script>
 
 <style scoped>
-
+.notice-page {
+  width: 60%;
+  margin: 30px auto;
+}
+.page-title {
+  border-left: 4px solid #2656b5;
+  padding-left: 16px;
+  margin-bottom: 24px;
+  font-size: 22px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.notice-title {
+  font-size: 16px;
+}
+.notice-time {
+  margin-left: 16px;
+  color: #999;
+  font-size: 12px;
+}
+.notice-content {
+  line-height: 1.6;
+  font-size: 14px;
+  color: #444;
+}
 </style>

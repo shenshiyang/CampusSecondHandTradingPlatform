@@ -1,67 +1,120 @@
 <template>
-  <div style="width: 50%; margin: 10px auto; padding: 30px" class="card">
-    <div style="font-size: 20px; margin-bottom: 30px; text-align: center">请填写反馈内容</div>
-    <el-form :model="form" label-width="100px" style="padding-right: 50px" :rules="rules" ref="formRef">
+  <el-card class="feedback-card" shadow="never">
+    <h2 class="title">请填写反馈内容</h2>
+
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      label-width="80px"
+      class="feedback-form"
+    >
       <el-form-item label="主题" prop="title">
-        <el-input v-model="form.title" placeholder="请输入主题"></el-input>
+        <el-input
+          v-model.trim="form.title"
+          maxlength="50"
+          show-word-limit
+          placeholder="请输入主题"
+          clearable
+        />
       </el-form-item>
+
       <el-form-item label="内容" prop="content">
-        <el-input type="textarea" v-model="form.content" placeholder="请输入内容"></el-input>
+        <el-input
+          v-model.trim="form.content"
+          type="textarea"
+          :autosize="{ minRows: 4, maxRows: 6 }"
+          maxlength="300"
+          show-word-limit
+          placeholder="请输入内容"
+          clearable
+        />
       </el-form-item>
+
       <el-form-item label="电话" prop="phone">
-        <el-input v-model="form.phone" placeholder="请输入电话"></el-input>
+        <el-input
+          v-model.trim="form.phone"
+          maxlength="11"
+          placeholder="请输入手机号"
+          clearable
+        />
       </el-form-item>
+
       <el-form-item label="邮箱" prop="email">
-        <el-input v-model="form.email" placeholder="请输入邮箱"></el-input>
+        <el-input
+          v-model.trim="form.email"
+          placeholder="请输入邮箱"
+          clearable
+        />
       </el-form-item>
-      <div style="text-align: center">
-        <el-button type="primary" @click="save">提交反馈</el-button>
+
+      <div class="actions">
+        <el-button
+          type="primary"
+          :loading="btnLoading"
+          @click="save"
+        >提交反馈</el-button>
       </div>
     </el-form>
-  </div>
+  </el-card>
 </template>
 
 <script>
 export default {
-  name: "Feedback",
+  name: 'Feedback',
   data() {
+    const phoneReg = /^1\d{10}$/;
+    const emailReg =
+      /^[A-Za-z0-9]+([._%+-]?[A-Za-z0-9]+)*@[A-Za-z0-9-]+(\.[A-Za-z]{2,})+$/;
     return {
       form: {},
+      btnLoading: false,
       rules: {
-        title: [
-          { required: true, message: '请输入主题', trigger: 'blur' }
-        ],
-        content: [
-          { required: true, message: '请输入内容', trigger: 'blur' }
-        ]
+        title: [{ required: true, message: '请输入主题', trigger: 'blur' }],
+        content: [{ required: true, message: '请输入内容', trigger: 'blur' }],
+        phone: [{ pattern: phoneReg, message: '手机号格式不正确', trigger: 'blur' }],
+        email: [{ pattern: emailReg, message: '邮箱格式不正确', trigger: 'blur' }]
       }
-    }
-  },
-  created() {
-
+    };
   },
   methods: {
-    save() {   // 保存按钮触发的逻辑  它会触发新增或者更新
-      this.$refs.formRef.validate((valid) => {
-        if (valid) {
-          this.$request({
-            url: '/feedback/add',
-            method: 'POST',
-            data: this.form
-          }).then(res => {
-            if (res.code === '200') {  // 表示成功保存
-              this.$message.success('提交成功')
-            } else {
-              this.$message.error(res.msg)  // 弹出错误的信息
-            }
-          })
+    async save() {
+      this.$refs.formRef.validate(async (valid) => {
+        if (!valid) return;
+        this.btnLoading = true;
+        const { code, msg } = await this.$request.post('/feedback/add', this.form);
+        this.btnLoading = false;
+
+        if (code === '200') {
+          this.$message.success('提交成功');
+          this.form = {}; // 清空表单
+          this.$nextTick(() => this.$refs.formRef.clearValidate());
+        } else {
+          this.$message.error(msg);
         }
-      })
-    },
+      });
+    }
   }
-}
+};
 </script>
 
 <style scoped>
-
+.feedback-card {
+  width: 50%;
+  margin: 40px auto;
+  padding: 30px 40px;
+}
+.title {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 20px;
+  font-weight: 600;
+}
+.feedback-form >>> .el-input__count {
+  line-height: 20px;
+}
+.actions {
+  text-align: center;
+  margin-top: 10px;
+}
 </style>

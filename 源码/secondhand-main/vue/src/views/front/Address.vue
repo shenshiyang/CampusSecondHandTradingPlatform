@@ -1,170 +1,206 @@
 <template>
-  <div style="width: 50%; margin: 10px auto" class="card">
-
-    <div style="margin-bottom: 10px">
-      <el-button type="primary" @click="handleAdd">新增</el-button>
-      <el-button type="danger" @click="delBatch">批量删除</el-button>
+  <div class="address-page">
+    <!-- ▍操作栏 -->
+    <div class="toolbar">
+      <el-button type="primary" size="mini" @click="handleAdd">新增</el-button>
+      <el-button type="danger"  size="mini" @click="delBatch">批量删除</el-button>
     </div>
 
-    <div class="table">
-      <el-table :data="tableData" strip @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" align="center"></el-table-column>
-        <el-table-column prop="id" label="序号" width="70" align="center" sortable></el-table-column>
-        <el-table-column prop="name" label="联系人"></el-table-column>
-        <el-table-column prop="address" label="联系地址"></el-table-column>
-        <el-table-column prop="phone" label="联系电话"></el-table-column>
-        <el-table-column label="操作" align="center" width="180">
-          <template v-slot="scope">
-            <el-button size="mini" type="primary" plain @click="handleEdit(scope.row)">编辑</el-button>
-            <el-button size="mini" type="danger" plain @click="del(scope.row.id)">删除</el-button>
+    <!-- ▍地址表格 -->
+    <el-card shadow="never">
+      <el-table
+        :data="tableData"
+        stripe
+        border
+        highlight-current-row
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="50" align="center" />
+        <el-table-column prop="id" label="序号" width="70" align="center" sortable />
+        <el-table-column prop="name" label="联系人" min-width="120" />
+        <el-table-column prop="address" label="联系地址" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="phone" label="联系电话" min-width="140" />
+        <el-table-column label="操作" width="180" align="center">
+          <template #default="scope">
+            <el-button
+              size="mini"
+              type="primary"
+              plain
+              @click="handleEdit(scope.row)"
+            >编辑</el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              plain
+              @click="del(scope.row.id)"
+            >删除</el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <div style="margin: 15px 0">
-        <el-pagination
-            background
-            @current-change="handleCurrentChange"
-            :current-page="pageNum"
-            :page-sizes="[5, 10, 20]"
-            :page-size="pageSize"
-            layout="total, prev, pager, next"
-            :total="total">
-        </el-pagination>
-      </div>
-    </div>
+      <el-pagination
+        class="pager"
+        background
+        :current-page="pageNum"
+        :page-size="pageSize"
+        :total="total"
+        :page-sizes="[5, 10, 20]"
+        layout="total, prev, pager, next"
+        @current-change="handleCurrentChange"
+      />
+    </el-card>
 
-    <el-dialog title="收货地址" :visible.sync="fromVisible" width="40%" :close-on-click-modal="false" destroy-on-close>
-      <el-form :model="form" label-width="100px" style="padding-right: 50px" :rules="rules" ref="formRef">
+    <!-- ▍弹窗表单 -->
+    <el-dialog
+      title="收货地址"
+      :visible.sync="dialogVisible"
+      width="480px"
+      :close-on-click-modal="false"
+      destroy-on-close
+    >
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="rules"
+        label-width="80px"
+      >
         <el-form-item label="联系人" prop="name">
-          <el-input v-model="form.name" placeholder="联系人"></el-input>
+          <el-input v-model.trim="form.name" clearable placeholder="联系人" />
         </el-form-item>
+
         <el-form-item label="联系地址" prop="address">
-          <el-input v-model="form.address" placeholder="联系地址"></el-input>
+          <el-input v-model.trim="form.address" clearable placeholder="联系地址" />
         </el-form-item>
+
         <el-form-item label="联系电话" prop="phone">
-          <el-input v-model="form.phone" placeholder="联系电话"></el-input>
+          <el-input v-model.trim="form.phone" clearable placeholder="联系电话" />
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="fromVisible = false">取 消</el-button>
-        <el-button type="primary" @click="save">确 定</el-button>
-      </div>
+
+      <template #footer>
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button
+          type="primary"
+          :loading="btnLoading"
+          @click="save"
+        >确 定</el-button>
+      </template>
     </el-dialog>
-
-
   </div>
 </template>
+
 <script>
 export default {
-  name: "Address",
+  name: 'Address',
   data() {
+    const phoneReg = /^1\d{10}$/
     return {
-      tableData: [],  // 所有的数据
-      pageNum: 1,   // 当前的页码
-      pageSize: 10,  // 每页显示的个数
+      tableData: [],
+      pageNum: 1,
+      pageSize: 10,
       total: 0,
-      name: null,
-      fromVisible: false,
+      dialogVisible: false,
       form: {},
-      user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
+      btnLoading: false,
+      ids: [],
       rules: {
-      },
-      ids: []
+        name: [{ required: true, message: '请输入联系人', trigger: 'blur' }],
+        address: [{ required: true, message: '请输入联系地址', trigger: 'blur' }],
+        phone: [
+          { required: true, message: '请输入联系电话', trigger: 'blur' },
+          { pattern: phoneReg, message: '手机号格式不正确', trigger: 'blur' }
+        ]
+      }
     }
   },
   created() {
-    this.load(1)
+    this.load()
   },
   methods: {
-    handleAdd() {   // 新增数据
-      this.form = {}  // 新增数据的时候清空数据
-      this.fromVisible = true   // 打开弹窗
-    },
-    handleEdit(row) {   // 编辑数据
-      this.form = JSON.parse(JSON.stringify(row))  // 给form对象赋值  注意要深拷贝数据
-      this.fromVisible = true   // 打开弹窗
-    },
-    save() {   // 保存按钮触发的逻辑  它会触发新增或者更新
-      this.$refs.formRef.validate((valid) => {
-        if (valid) {
-          this.$request({
-            url: this.form.id ? '/address/update' : '/address/add',
-            method: this.form.id ? 'PUT' : 'POST',
-            data: this.form
-          }).then(res => {
-            if (res.code === '200') {  // 表示成功保存
-              this.$message.success('保存成功')
-              this.load(1)
-              this.fromVisible = false
-            } else {
-              this.$message.error(res.msg)  // 弹出错误的信息
-            }
-          })
-        }
+    /* ---------- 数据 ---------- */
+    async load(page = this.pageNum) {
+      this.pageNum = page
+      const res = await this.$request.get('/address/selectPage', {
+        params: { pageNum: this.pageNum, pageSize: this.pageSize }
       })
-    },
-    del(id) {   // 单个删除
-      this.$confirm('您确定删除吗？', '确认删除', {type: "warning"}).then(response => {
-        this.$request.delete('/address/delete/' + id).then(res => {
-          if (res.code === '200') {   // 表示操作成功
-            this.$message.success('操作成功')
-            this.load(1)
-          } else {
-            this.$message.error(res.msg)  // 弹出错误的信息
-          }
-        })
-      }).catch(() => {
-      })
-    },
-    handleSelectionChange(rows) {   // 当前选中的所有的行数据
-      this.ids = rows.map(v => v.id)
-    },
-    delBatch() {   // 批量删除
-      if (!this.ids.length) {
-        this.$message.warning('请选择数据')
-        return
+      if (res.code === '200') {
+        this.tableData = res.data.list
+        this.total = res.data.total
+      } else {
+        this.$message.error(res.msg)
       }
-      this.$confirm('您确定批量删除这些数据吗？', '确认删除', {type: "warning"}).then(response => {
-        this.$request.delete('/address/delete/batch', {data: this.ids}).then(res => {
-          if (res.code === '200') {   // 表示操作成功
-            this.$message.success('操作成功')
-            this.load(1)
-          } else {
-            this.$message.error(res.msg)  // 弹出错误的信息
-          }
-        })
-      }).catch(() => {
-      })
     },
-    load(pageNum) {  // 分页查询
-      if (pageNum) this.pageNum = pageNum
-      this.$request.get('/address/selectPage', {
-        params: {
-          pageNum: this.pageNum,
-          pageSize: this.pageSize,
-          name: this.name,
-        }
-      }).then(res => {
+
+    /* ---------- 新增 / 编辑 ---------- */
+    handleAdd() {
+      this.form = { }
+      this.dialogVisible = true
+    },
+    handleEdit(row) {
+      this.form = { ...row }
+      this.dialogVisible = true
+    },
+    async save() {
+      this.$refs.formRef.validate(async valid => {
+        if (!valid) return
+        this.btnLoading = true
+        const isUpdate = !!this.form.id
+        const res = await this.$request({
+          url: isUpdate ? '/address/update' : '/address/add',
+          method: isUpdate ? 'PUT' : 'POST',
+          data: this.form
+        })
+        this.btnLoading = false
         if (res.code === '200') {
-          this.tableData = res.data?.list
-          this.total = res.data?.total
+          this.$message.success('操作成功')
+          this.dialogVisible = false
+          this.load(1)
         } else {
           this.$message.error(res.msg)
         }
       })
     },
-    reset() {
-      this.name = null
-      this.load(1)
+
+    /* ---------- 删除 ---------- */
+    del(id) {
+      this.$confirm('确定删除该地址吗？', '提示', { type: 'warning' })
+        .then(() => this.$request.delete('/address/delete/' + id))
+        .then(({ code, msg }) => {
+          code === '200' ? (this.$message.success('删除成功'), this.load(1)) : this.$message.error(msg)
+        })
+        .catch(() => {})
     },
-    handleCurrentChange(pageNum) {
-      this.load(pageNum)
+    handleSelectionChange(rows) {
+      this.ids = rows.map(v => v.id)
     },
+    delBatch() {
+      if (!this.ids.length) return this.$message.warning('请选择数据')
+      this.$confirm('确认批量删除所选地址吗？', '提示', { type: 'warning' })
+        .then(() => this.$request.delete('/address/delete/batch', { data: this.ids }))
+        .then(({ code, msg }) => {
+          code === '200' ? (this.$message.success('删除成功'), this.load(1)) : this.$message.error(msg)
+        })
+        .catch(() => {})
+    },
+
+    /* ---------- 分页 ---------- */
+    handleCurrentChange(page) {
+      this.load(page)
+    }
   }
 }
 </script>
 
 <style scoped>
-
+.address-page {
+  width: 60%;
+  margin: 20px auto;
+}
+.toolbar {
+  margin-bottom: 10px;
+}
+.pager {
+  margin-top: 15px;
+  text-align: center;
+}
 </style>

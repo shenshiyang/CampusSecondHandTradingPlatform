@@ -2,7 +2,7 @@
   <div style="margin: 0 auto; padding: 10px 0; width: 50%">
     <div style="display: flex; grid-gap: 20px; margin-bottom: 40px">
       <!-- 商品图片 -->
-      <img :src="goods.img" alt="" style="width: 50%; height: 400px; display: block">
+      <img :src="goods.img" alt="" style="width: 50%; height: 400px; display: block; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1)">
 
       <!-- 商品信息 -->
       <div style="flex: 1; width: 0">
@@ -91,63 +91,63 @@ export default {
       form: {},
       fromVisible: false,
       addressList: []
-    }
+    };
   },
   created() {
     this.$request.put('/goods/updateReadCount/' + this.id).then(() => {
-      this.load()
-    })
-    this.loadAddress()
+      this.load();
+    });
+    this.loadAddress();
   },
   methods: {
     chat(userId) {
       this.$request.post('/chatGroup/add', { chatUserId: userId, userId: this.user.id }).then(() => {
-        this.$router.push('/front/chat')
-      })
+        this.$router.push('/front/chat');
+      });
     },
     handleBuy() {
-      this.form = {}
-      this.fromVisible = true
+      this.form = {};
+      this.fromVisible = true;
     },
     addOrder() {
       if (!this.form.addressId) {
-        this.$message.warning('请选择收货地址')
-        return
+        this.$message.warning('请选择收货地址');
+        return;
       }
-      this.form.goodsId = this.id
+      this.form.goodsId = this.id;
       this.$request.post('/orders/add', this.form).then(res => {
         if (res.code === '200') {
-          this.$message.success('下单成功')
-          this.$router.push('/front/orders')
+          this.$message.success('下单成功');
+          this.$router.push('/front/orders');
         } else {
-          this.$message.error(res.msg)
+          this.$message.error(res.msg);
         }
-      })
+      });
     },
     loadAddress() {
       this.$request.get('/address/selectAll').then(res => {
-        this.addressList = res.data || []
-      })
+        this.addressList = res.data || [];
+      });
     },
     addLikes() {
-      const isLiking = !this.goods.userLikes
-      const messageText = isLiking ? '点赞成功' : '取消点赞成功'
+      const isLiking = !this.goods.userLikes;
+      const messageText = isLiking ? '点赞成功' : '取消点赞成功';
       this.$request.post('/likes/add', {
         userId: this.user.id,
         fid: this.goods.id,
         module: 'goods'
       }).then(res => {
         if (res.code === '200') {
-          this.$message.success(messageText)
-          this.load()
+          this.$message.success(messageText);
+          this.load();
         } else {
-          this.$message.error(res.msg)
+          this.$message.error(res.msg);
         }
-      })
+      });
     },
     addCollect() {
-      const isCollecting = !this.goods.userCollect
-      const messageText = isCollecting ? '收藏成功' : '取消收藏成功'
+      const isCollecting = !this.goods.userCollect;
+      const messageText = isCollecting ? '收藏成功' : '取消收藏成功';
       this.$request.post('/collect/add', {
         userId: this.user.id,
         fid: this.goods.id,
@@ -156,23 +156,23 @@ export default {
         goodsImg: this.goods.img
       }).then(res => {
         if (res.code === '200') {
-          this.$message.success(messageText)
-          this.load()
+          this.$message.success(messageText);
+          this.load();
         } else {
-          this.$message.error(res.msg)
+          this.$message.error(res.msg);
         }
-      })
+      });
     },
     changeItem(current) {
-      this.current = current
+      this.current = current;
     },
     load() {
       this.$request.get('/goods/selectById/' + this.id).then(res => {
-        this.goods = res.data || {}
-      })
+        this.goods = res.data || {};
+      });
     }
   }
-}
+};
 </script>
 
 <style scoped>

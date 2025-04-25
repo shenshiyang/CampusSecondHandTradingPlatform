@@ -1,214 +1,238 @@
 <template>
-  <div style="width: 80%; margin: 10px auto" class="card">
-    <div style="margin-bottom: 10px">
-      <el-button type="primary" plain @click="handleAdd">发布求助</el-button>
+  <div class="user-help card">
+    <!-- ▍顶部操作 -->
+    <div class="toolbar">
+      <el-button type="primary" plain size="mini" @click="handleAdd">
+        发布求助
+      </el-button>
     </div>
 
-    <div style="margin: 10px auto">
-      <el-table :data="tableData" strip>
-        <el-table-column prop="title" label="标题"></el-table-column>
-        <el-table-column prop="content" label="内容" show-overflow-tooltip></el-table-column>
-        <el-table-column prop="img" label="图片">
-          <template v-slot="scope">
-            <el-image v-if="scope.row.img" style="width: 50px" :src="scope.row.img" :preview-src-list="[scope.row.img]"></el-image>
-          </template>
-        </el-table-column>
-        <el-table-column prop="time" label="发布时间"></el-table-column>
-        <el-table-column prop="solved" label="是否解决">
-          <template v-slot="scope">
-            <el-tag type="danger" v-if="scope.row.solved === '未解决'">未解决</el-tag>
-            <el-tag type="success" v-if="scope.row.solved === '已解决'">已解决</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="status" label="审核状态">
-          <template v-slot="scope">
-            <el-tag type="info" v-if="scope.row.status === '待审核'">待审核</el-tag>
-            <el-tag type="success" v-if="scope.row.status === '通过'">通过</el-tag>
-            <el-tag type="danger" v-if="scope.row.status === '拒绝'">拒绝</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" align="center" width="180">
-          <template v-slot="scope">
-            <el-button v-if="scope.row.status !== '通过'" size="mini" type="success" plain @click="handleEdit(scope.row)">编辑</el-button>
-            <el-button size="mini" type="danger" plain @click="del(scope.row.id)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+    <!-- ▍列表 -->
+    <el-table
+      :data="tableData"
+      stripe
+      border
+    >
+      <el-table-column prop="title" label="标题" />
+      <el-table-column prop="content" label="内容" show-overflow-tooltip />
+      <el-table-column label="图片" width="80">
+        <template #default="{ row }">
+          <el-image
+            v-if="row.img"
+            :src="row.img"
+            :preview-src-list="[row.img]"
+            style="width: 50px"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column prop="time" label="发布时间" width="160" />
+      <el-table-column label="是否解决" width="90">
+        <template #default="{ row }">
+          <el-tag type="danger" v-if="row.solved === '未解决'">未解决</el-tag>
+          <el-tag type="success" v-else>已解决</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="审核状态" width="90">
+        <template #default="{ row }">
+          <el-tag type="info" v-if="row.status === '待审核'">待审核</el-tag>
+          <el-tag type="success" v-if="row.status === '通过'">通过</el-tag>
+          <el-tag type="danger" v-if="row.status === '拒绝'">拒绝</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="180" align="center">
+        <template #default="{ row }">
+          <el-button
+            v-if="row.status !== '通过'"
+            size="mini"
+            type="success"
+            plain
+            @click="handleEdit(row)"
+          >编辑</el-button>
+          <el-button
+            size="mini"
+            type="danger"
+            plain
+            @click="del(row.id)"
+          >删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
 
-      <div style="margin: 15px auto">
-        <el-pagination
-            background
-            @current-change="handleCurrentChange"
-            :current-page="pageNum"
-            :page-sizes="[5, 10, 20]"
-            :page-size="pageSize"
-            layout="total, prev, pager, next"
-            :total="total">
-        </el-pagination>
-      </div>
-    </div>
+    <!-- ▍分页 -->
+    <el-pagination
+      v-if="total"
+      class="pager"
+      background
+      layout="total, prev, pager, next"
+      :current-page="pageNum"
+      :page-size="pageSize"
+      :total="total"
+      :page-sizes="[10, 20, 30]"
+      @current-change="handleCurrentChange"
+    />
 
-    <el-dialog title="求购信息" :visible.sync="fromVisible" width="40%" :close-on-click-modal="false" destroy-on-close>
-      <el-form :model="form" label-width="100px" style="padding-right: 50px" :rules="rules" ref="formRef">
+    <!-- ▍新增 / 编辑弹窗 -->
+    <el-dialog
+      title="求购信息"
+      :visible.sync="dialogVisible"
+      width="480px"
+      :close-on-click-modal="false"
+      destroy-on-close
+    >
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="rules"
+        label-width="90px"
+      >
         <el-form-item label="标题" prop="title">
-          <el-input v-model="form.title" placeholder="标题"></el-input>
+          <el-input v-model.trim="form.title" />
         </el-form-item>
+
         <el-form-item label="内容" prop="content">
-          <el-input type="textarea" v-model="form.content" placeholder="内容"></el-input>
+          <el-input
+            type="textarea"
+            :autosize="{ minRows: 3 }"
+            v-model.trim="form.content"
+          />
         </el-form-item>
-        <el-form-item label="图片" prop="img">
+
+        <el-form-item label="图片">
           <el-upload
-              :action="$baseUrl + '/files/upload'"
-              :headers="{ token: user.token }"
-              list-type="picture"
-              :on-success="handleImgSuccess"
+            :action="$baseUrl + '/files/upload'"
+            :headers="{ token: user.token }"
+            list-type="picture-card"
+            :limit="1"
+            :on-success="handleImgSuccess"
+            :file-list="fileList"
           >
-            <el-button type="primary">上传</el-button>
+            <i class="el-icon-plus" />
           </el-upload>
         </el-form-item>
+
         <el-form-item label="是否解决" prop="solved">
-          <el-select style="width: 100%" v-model="form.solved">
-            <el-option value="未解决"></el-option>
-            <el-option value="已解决"></el-option>
+          <el-select v-model="form.solved" placeholder="请选择">
+            <el-option value="未解决" />
+            <el-option value="已解决" />
           </el-select>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="fromVisible = false">取 消</el-button>
-        <el-button type="primary" @click="save">确 定</el-button>
-      </div>
+
+      <template #footer>
+        <el-button size="mini" @click="dialogVisible = false">取消</el-button>
+        <el-button
+          type="primary"
+          size="mini"
+          :loading="btnLoading"
+          @click="save"
+        >确定</el-button>
+      </template>
     </el-dialog>
-
-
   </div>
 </template>
+
 <script>
 export default {
-  title: "UserHelp",
+  name: 'UserHelp',
   data() {
     return {
-      tableData: [],  // 所有的数据
-      pageNum: 1,   // 当前的页码
-      pageSize: 10,  // 每页显示的个数
+      tableData: [],
+      pageNum: 1,
+      pageSize: 10,
       total: 0,
-      title: null,
-      fromVisible: false,
-      form: {},
-      user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
+      keyword: '',
+      dialogVisible: false,
+      btnLoading: false,
+      form: { solved: '未解决' },
       rules: {
+        title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
+        content: [{ required: true, message: '请输入内容', trigger: 'blur' }]
       },
-      ids: []
+      fileList: [],
+      user: JSON.parse(localStorage.getItem('xm-user') || '{}')
     }
   },
   created() {
-    this.load(1)
+    this.load()
   },
   methods: {
-    changeStatus(row, status) {
-      this.$confirm('您确定'+status+'吗？', '确认操作', {type: "warning"}).then(response => {
-        this.form = JSON.parse(JSON.stringify(row))  // 给form对象赋值  注意要深拷贝数据
-        this.form.status = status
-        this.$request.put('/help/update', this.form).then(res => {
-          if (res.code === '200') {  // 表示成功保存
-            this.$message.success('操作成功')
-            this.load(1)
-          } else {
-            this.$message.error(res.msg)  // 弹出错误的信息
-          }
-        })
-      }).catch(err => {})
-    },
-    handleAdd() {   // 新增数据
-      this.form = {}  // 新增数据的时候清空数据
-      this.fromVisible = true   // 打开弹窗
-    },
-    handleEdit(row) {   // 编辑数据
-      this.form = JSON.parse(JSON.stringify(row))  // 给form对象赋值  注意要深拷贝数据
-      this.fromVisible = true   // 打开弹窗
-    },
-    save() {   // 保存按钮触发的逻辑  它会触发新增或者更新
-      this.$refs.formRef.validate((valid) => {
-        if (valid) {
-          this.$request({
-            url: this.form.id ? '/help/update' : '/help/add',
-            method: this.form.id ? 'PUT' : 'POST',
-            data: this.form
-          }).then(res => {
-            if (res.code === '200') {  // 表示成功保存
-              this.$message.success('保存成功')
-              this.load(1)
-              this.fromVisible = false
-            } else {
-              this.$message.error(res.msg)  // 弹出错误的信息
-            }
-          })
-        }
-      })
-    },
-    del(id) {   // 单个删除
-      this.$confirm('您确定删除吗？', '确认删除', {type: "warning"}).then(response => {
-        this.$request.delete('/help/delete/' + id).then(res => {
-          if (res.code === '200') {   // 表示操作成功
-            this.$message.success('操作成功')
-            this.load(1)
-          } else {
-            this.$message.error(res.msg)  // 弹出错误的信息
-          }
-        })
-      }).catch(() => {
-      })
-    },
-    handleSelectionChange(rows) {   // 当前选中的所有的行数据
-      this.ids = rows.map(v => v.id)
-    },
-    delBatch() {   // 批量删除
-      if (!this.ids.length) {
-        this.$message.warning('请选择数据')
-        return
-      }
-      this.$confirm('您确定批量删除这些数据吗？', '确认删除', {type: "warning"}).then(response => {
-        this.$request.delete('/help/delete/batch', {data: this.ids}).then(res => {
-          if (res.code === '200') {   // 表示操作成功
-            this.$message.success('操作成功')
-            this.load(1)
-          } else {
-            this.$message.error(res.msg)  // 弹出错误的信息
-          }
-        })
-      }).catch(() => {
-      })
-    },
-    load(pageNum) {  // 分页查询
-      if (pageNum) this.pageNum = pageNum
-      this.$request.get('/help/selectPage', {
+    /* ---------- 列表 ---------- */
+    async load(page = this.pageNum) {
+      this.pageNum = page
+      const { code, data, msg } = await this.$request.get('/help/selectPage', {
         params: {
           pageNum: this.pageNum,
           pageSize: this.pageSize,
-          title: this.title,
-        }
-      }).then(res => {
-        if (res.code === '200') {
-          this.tableData = res.data?.list
-          this.total = res.data?.total
-        } else {
-          this.$message.error(res.msg)
+          title: this.keyword
         }
       })
+      if (code === '200') {
+        this.tableData = data.list
+        this.total = data.total
+      } else {
+        this.$message.error(msg)
+      }
     },
-    reset() {
-      this.title = null
-      this.load(1)
+    handleCurrentChange(page) {
+      this.load(page)
     },
-    handleCurrentChange(pageNum) {
-      this.load(pageNum)
+
+    /* ---------- 弹窗 ---------- */
+    handleAdd() {
+      this.form = { solved: '未解决' }
+      this.fileList = []
+      this.dialogVisible = true
     },
-    handleImgSuccess(response, file, fileList) {
-      this.form.img = response.data
+    handleEdit(row) {
+      this.form = { ...row }
+      this.fileList = row.img ? [{ url: row.img }] : []
+      this.dialogVisible = true
     },
+    handleImgSuccess({ data }) {
+      this.form.img = data
+    },
+    async save() {
+      const valid = await this.$refs.formRef.validate().catch(() => false)
+      if (!valid) return
+      this.btnLoading = true
+      const url = this.form.id ? '/help/update' : '/help/add'
+      const method = this.form.id ? 'PUT' : 'POST'
+      const { code, msg } = await this.$request({ url, method, data: this.form })
+      this.btnLoading = false
+      if (code === '200') {
+        this.$message.success('保存成功')
+        this.dialogVisible = false
+        this.load(1)
+      } else {
+        this.$message.error(msg)
+      }
+    },
+
+    /* ---------- 删除 ---------- */
+    del(id) {
+      this.$confirm('您确定删除吗？', '确认删除', { type: 'warning' })
+        .then(() => this.$request.delete(`/help/delete/${id}`))
+        .then(({ code, msg }) => {
+          code === '200'
+            ? (this.$message.success('操作成功'), this.load(1))
+            : this.$message.error(msg)
+        })
+        .catch(() => {})
+    }
   }
 }
 </script>
 
 <style scoped>
-
+.user-help {
+  width: 80%;
+  margin: 20px auto;
+}
+.toolbar {
+  margin-bottom: 12px;
+}
+.pager {
+  margin-top: 16px;
+  text-align: center;
+}
 </style>

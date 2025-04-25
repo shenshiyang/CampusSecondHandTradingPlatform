@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * 用户信息
-*/
+ */
 public class User extends Account implements Serializable {
     private static final long serialVersionUID = 1L;
 

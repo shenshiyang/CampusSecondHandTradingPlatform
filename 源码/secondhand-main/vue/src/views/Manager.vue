@@ -4,7 +4,7 @@
     <div class="manager-header">
       <div class="manager-header-left">
         <img src="@/assets/imgs/logo.png" />
-        <div class="title">二手交易后台管理</div>
+        <div class="title">前湖集市后台管理</div>
       </div>
 
       <div class="manager-header-center">
@@ -46,7 +46,7 @@
             <el-menu-item index="/goods">商品信息</el-menu-item>
             <el-menu-item index="/circles">圈子信息</el-menu-item>
             <el-menu-item index="/posts">社区帖子</el-menu-item>
-            <el-menu-item index="/help">求购信息</el-menu-item>
+            <el-menu-item index="/help">求助信息</el-menu-item>
             <el-menu-item index="/address">收货地址</el-menu-item>
             <el-menu-item index="/feedback">用户反馈</el-menu-item>
             <el-menu-item index="/notice">公告信息</el-menu-item>

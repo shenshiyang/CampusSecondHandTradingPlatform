@@ -1,5 +1,6 @@
 <template>
   <div class="goods-container">
+    <!-- Card Box for Product Table -->
     <el-card class="card-box">
       <el-table
         :data="tableData"
@@ -9,22 +10,24 @@
         highlight-current-row
         style="width: 100%; table-layout: fixed"
       >
-        <!-- 商品名称：居中 + 均分 -->
+        <!-- 商品名称 -->
         <el-table-column prop="name" label="名称" align="center" show-overflow-tooltip />
 
-        <!-- 固定列 -->
+        <!-- 价格列 -->
         <el-table-column prop="price" label="价格" width="100" align="center">
           <template v-slot="scope">
-            <span style="color: red; font-weight: bold">￥{{ scope.row.price }}</span>
+            <span class="price-text">￥{{ scope.row.price }}</span>
           </template>
         </el-table-column>
 
+        <!-- 库存列 -->
         <el-table-column label="库存" width="100" align="center">
           <template v-slot="scope">
             <span>{{ scope.row.stock }} 件</span>
           </template>
         </el-table-column>
 
+        <!-- 上架状态列 -->
         <el-table-column prop="saleStatus" label="上架状态" width="100" align="center">
           <template v-slot="scope">
             <el-tag :type="scope.row.saleStatus === '上架' ? 'success' : 'info'">
@@ -33,9 +36,10 @@
           </template>
         </el-table-column>
 
+        <!-- 浏览量列 -->
         <el-table-column prop="readCount" label="浏览量" width="100" align="center" />
 
-        <!-- 操作列：居中 + 均分 -->
+        <!-- 操作列 -->
         <el-table-column label="操作" align="center">
           <template v-slot="scope">
             <div class="btn-group">
@@ -62,6 +66,7 @@
         </el-table-column>
       </el-table>
 
+      <!-- Pagination -->
       <div class="pagination-bar">
         <el-pagination
           background
@@ -81,10 +86,10 @@
       width="400px"
       :close-on-click-modal="false"
     >
-      <div style="margin-bottom: 20px">
+      <div class="stock-input">
         <el-input-number v-model="tempStock" :min="0" controls-position="right" style="width: 100%" />
       </div>
-      <div style="text-align: right">
+      <div class="dialog-footer">
         <el-button @click="stockDialogVisible = false">取消</el-button>
         <el-button type="primary" @click="confirmUpdateStock">确认修改</el-button>
       </div>
@@ -104,46 +109,46 @@ export default {
       stockDialogVisible: false,
       currentRow: null,
       tempStock: 0,
-    }
+    };
   },
   created() {
-    this.load(1)
+    this.load(1);
   },
   methods: {
     handleEdit(row) {
-      this.$router.push('/front/addGoods?id=' + row.id)
+      this.$router.push('/front/addGoods?id=' + row.id);
     },
     del(id) {
       this.$confirm('您确定删除该商品吗？', '确认操作', { type: 'warning' }).then(() => {
         this.$request.delete('/goods/delete/' + id).then(res => {
           if (res.code === '200') {
-            this.$message.success('删除成功')
-            this.load(1)
+            this.$message.success('删除成功');
+            this.load(1);
           } else {
-            this.$message.error(res.msg)
+            this.$message.error(res.msg);
           }
-        })
-      }).catch(() => {})
+        });
+      }).catch(() => {});
     },
     toggleStatus(row) {
-      const newStatus = row.saleStatus === '上架' ? '下架' : '上架'
+      const newStatus = row.saleStatus === '上架' ? '下架' : '上架';
       this.$request.post('/goods/updateStockAndSaleStatus', {
         id: row.id,
         stock: row.stock,
         saleStatus: newStatus
       }).then(res => {
         if (res.code === '200') {
-          row.saleStatus = newStatus
-          this.$message.success(`已${newStatus}`)
+          row.saleStatus = newStatus;
+          this.$message.success(`已${newStatus}`);
         } else {
-          this.$message.error(res.msg)
+          this.$message.error(res.msg);
         }
-      })
+      });
     },
     openStockDialog(row) {
-      this.currentRow = row
-      this.tempStock = row.stock
-      this.stockDialogVisible = true
+      this.currentRow = row;
+      this.tempStock = row.stock;
+      this.stockDialogVisible = true;
     },
     confirmUpdateStock() {
       this.$request.post('/goods/updateStockAndSaleStatus', {
@@ -152,16 +157,16 @@ export default {
         saleStatus: this.currentRow.saleStatus
       }).then(res => {
         if (res.code === '200') {
-          this.$message.success("库存已更新")
-          this.currentRow.stock = this.tempStock
-          this.stockDialogVisible = false
+          this.$message.success("库存已更新");
+          this.currentRow.stock = this.tempStock;
+          this.stockDialogVisible = false;
         } else {
-          this.$message.error(res.msg)
+          this.$message.error(res.msg);
         }
-      })
+      });
     },
     load(pageNum) {
-      if (pageNum) this.pageNum = pageNum
+      if (pageNum) this.pageNum = pageNum;
       this.$request.get('/goods/selectPage', {
         params: {
           pageNum: this.pageNum,
@@ -169,38 +174,63 @@ export default {
         }
       }).then(res => {
         if (res.code === '200') {
-          this.tableData = res.data?.list || []
-          this.total = res.data?.total
+          this.tableData = res.data?.list || [];
+          this.total = res.data?.total;
         } else {
-          this.$message.error(res.msg)
+          this.$message.error(res.msg);
         }
-      })
+      });
     },
     handleCurrentChange(pageNum) {
-      this.load(pageNum)
+      this.load(pageNum);
     }
   }
-}
+};
 </script>
 
 <style scoped>
+/* Container Styling */
 .goods-container {
   width: 90%;
   margin: 30px auto;
 }
+
+/* Card Box Styling */
 .card-box {
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border-radius: 12px;
 }
+
+/* Pagination Bar Styling */
 .pagination-bar {
   margin-top: 20px;
   text-align: center;
 }
+
+/* Button Group Styling */
 .btn-group {
   display: flex;
   gap: 8px;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+.el-button {
+  margin-top: 5px;
+}
+
+/* Hover Effects for Buttons */
+.el-button:hover {
+  background-color: #f0f0f0;
+}
+
+/* Stock Dialog Styling */
+.stock-input {
+  margin-bottom: 20px;
+}
+
+.dialog-footer {
+  text-align: right;
 }
 </style>

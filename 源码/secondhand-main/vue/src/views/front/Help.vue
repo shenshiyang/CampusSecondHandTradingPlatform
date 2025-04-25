@@ -1,80 +1,96 @@
 <template>
-  <div class="help-container">
-    <!-- 查询栏 -->
+  <div class="help-page">
+    <!-- ▍查询栏 -->
     <div class="search-bar">
       <el-input
-        v-model="title"
+        v-model.trim="title"
         placeholder="请输入标题关键字查询"
         clearable
         class="search-input"
+        @keyup.enter.native="load(1)"
       />
-      <el-button type="primary" @click="load(1)">查询</el-button>
+      <el-button type="primary" size="mini" @click="load(1)">查询</el-button>
     </div>
 
-    <!-- 求助卡片列表 -->
+    <!-- ▍求助列表 -->
     <el-card
-      class="help-card"
       v-for="item in tableData"
       :key="item.id"
+      class="help-card"
+      shadow="never"
     >
-      <div class="help-header">
-        <img :src="item.avatar" alt="用户头像" class="user-avatar" />
-        <div class="help-info">
-          <div class="help-title">
+      <!-- 头部 -->
+      <header class="help-header">
+        <img :src="item.avatar" alt="用户头像" class="avatar" />
+        <div class="info">
+          <div class="title">
             <strong>{{ item.title }}</strong>
-            <el-tag type="danger" v-if="item.solved === '未解决'">未解决</el-tag>
-            <el-tag type="success" v-if="item.solved === '已解决'">已解决</el-tag>
+            <el-tag
+              size="mini"
+              :type="item.solved === '未解决' ? 'danger' : 'success'"
+            >
+              {{ item.solved }}
+            </el-tag>
           </div>
           <div class="meta">
             <span>{{ item.userName }}</span>
             <span>{{ item.time }}</span>
           </div>
         </div>
-      </div>
+      </header>
 
+      <!-- 图片 -->
       <el-image
-        class="help-img"
+        v-if="item.img"
         :src="item.img"
         :preview-src-list="[item.img]"
         fit="cover"
-        v-if="item.img"
+        class="help-img"
       />
 
-      <div class="help-content" v-html="item.content"></div>
+      <!-- 内容 -->
+      <div
+        class="help-content"
+        v-html="item.content"
+      />
 
+      <!-- 评论按钮 -->
       <el-button
-        class="comment-toggle-btn"
+        size="mini"
         type="primary"
-        size="small"
-        @click="handleCommentShow(item)"
+        plain
+        @click="toggleComment(item)"
       >
-        展开 / 折叠 求购评论
+        {{ item.showComment ? '收起评论' : '展开评论' }}
       </el-button>
 
-      <div v-if="item.showComment" class="comment-section">
-        <Comment :fid="item.id" module="help" />
-      </div>
+      <!-- 评论区 -->
+      <transition name="fade">
+        <div v-if="item.showComment" class="comment-area">
+          <Comment :fid="item.id" module="help" />
+        </div>
+      </transition>
     </el-card>
 
-    <!-- 分页 -->
-    <div class="pagination-wrapper" v-if="total > 0">
-      <el-pagination
-        background
-        layout="total, prev, pager, next"
-        :current-page="pageNum"
-        :page-size="pageSize"
-        :total="total"
-        :page-sizes="[5, 10, 20]"
-        @current-change="handleCurrentChange"
-      />
-    </div>
+    <!-- ▍分页 -->
+    <el-pagination
+      v-if="total"
+      class="pager"
+      background
+      layout="total, prev, pager, next"
+      :current-page="pageNum"
+      :page-size="pageSize"
+      :total="total"
+      :page-sizes="[5, 10, 20]"
+      @current-change="handleCurrentChange"
+    />
   </div>
 </template>
 
 <script>
-import Comment from "@/components/Comment";
+import Comment from '@/components/Comment'
 export default {
-  name: "Help",
+  name: 'Help',
   components: { Comment },
   data() {
     return {
@@ -82,101 +98,130 @@ export default {
       pageNum: 1,
       pageSize: 5,
       total: 0,
-      title: '',
-    };
+      title: ''
+    }
   },
   created() {
-    this.load(1);
+    this.load()
   },
   methods: {
-    handleCommentShow(help) {
-      this.$set(help, 'showComment', !help.showComment);
-    },
-    load(pageNum) {
-      if (pageNum) this.pageNum = pageNum;
-      this.$request.get('/help/selectFrontPage', {
-        params: {
-          pageNum: this.pageNum,
-          pageSize: this.pageSize,
-          title: this.title
+    /* ---------- 数据 ---------- */
+    async load(page = this.pageNum) {
+      this.pageNum = page
+      const { code, data, msg } = await this.$request.get(
+        '/help/selectFrontPage',
+        {
+          params: {
+            pageNum: this.pageNum,
+            pageSize: this.pageSize,
+            title: this.title
+          }
         }
-      }).then(res => {
-        if (res.code === '200') {
-          this.tableData = res.data?.list;
-          this.total = res.data?.total;
-        } else {
-          this.$message.error(res.msg);
-        }
-      });
+      )
+      if (code === '200') {
+        this.tableData = (data.list || []).map((v) => ({
+          ...v,
+          showComment: v.showComment ?? false
+        }))
+        this.total = data.total
+      } else {
+        this.$message.error(msg)
+      }
     },
-    handleCurrentChange(pageNum) {
-      this.load(pageNum);
+
+    /* ---------- 评论折叠 ---------- */
+    toggleComment(item) {
+      this.$set(item, 'showComment', !item.showComment)
     },
+
+    /* ---------- 分页 ---------- */
+    handleCurrentChange(page) {
+      this.load(page)
+    }
   }
-};
+}
 </script>
 
 <style scoped>
-.help-container {
+/* 容器 */
+.help-page {
   width: 60%;
-  margin: 20px auto;
+  margin: 30px auto;
 }
+/* 查询栏 */
 .search-bar {
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 .search-input {
   width: 300px;
   margin-right: 10px;
 }
+/* 卡片 */
 .help-card {
   margin-bottom: 20px;
   padding: 20px;
 }
+/* 头部 */
 .help-header {
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
-.user-avatar {
-  width: 50px;
-  height: 50px;
+.avatar {
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 15px;
+  margin-right: 14px;
 }
-.help-info {
+.info {
   flex: 1;
 }
-.help-title {
+.title {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 16px;
-  margin-bottom: 5px;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 .meta {
-  color: #888;
+  color: #8c8c8c;
   font-size: 13px;
   display: flex;
-  gap: 20px;
+  gap: 18px;
 }
+/* 图片 */
 .help-img {
   width: 100%;
-  max-width: 300px;
-  margin: 15px 0;
+  max-width: 320px;
+  margin: 12px 0;
+  border-radius: 4px;
 }
+/* 内容 */
 .help-content {
   font-size: 14px;
   color: #444;
-  margin: 10px 0 15px;
-}
-.comment-toggle-btn {
   margin-bottom: 10px;
 }
-.pagination-wrapper {
+/* 评论 */
+.comment-area {
+  margin-top: 15px;
+  border-top: 1px dashed #e5e5e5;
+  padding-top: 15px;
+}
+/* 分页 */
+.pager {
+  margin-top: 26px;
   text-align: center;
-  margin-top: 30px;
+}
+/* 动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s;
+}
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
