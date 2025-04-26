@@ -1,4 +1,4 @@
-<template>
+              <template>
   <div>
     <div class="search">
       <el-input placeholder="请输入关键字查询" style="width: 200px" v-model="title"></el-input>

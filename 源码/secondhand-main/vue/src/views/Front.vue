@@ -22,8 +22,9 @@
       </div>
 
       <!-- 聊天消息 -->
-      <div class="front-header-chat" @click="$router.push('/front/chat')">
+      <div class="front-header-chat" @click="goToChat">
         <i class="el-icon-chat-dot-round" style="margin-right: 4px"></i> 聊天消息
+        <div v-if="totalUnreadCount > 0" class="unread-badge">{{ totalUnreadCount }}</div>
       </div>
 
       <!-- 右侧用户 -->
@@ -35,7 +36,10 @@
         <template v-else>
           <el-dropdown>
             <div class="user-info">
-              <img :src="user.avatar" class="avatar" alt="用户头像" />
+              <div class="avatar-wrapper">
+                <img :src="user.avatar" class="avatar" alt="用户头像" />
+                <div v-if="totalUnreadCount > 0" class="unread-badge avatar-badge">{{ totalUnreadCount }}</div>
+              </div>
               <span>{{ user.name }}</span>
               <i class="el-icon-arrow-down" style="margin-left: 4px"></i>
             </div>
@@ -74,12 +78,123 @@ export default {
         { text: '求助专区', path: '/front/help' },
         { text: '系统公告', path: '/front/notice' },
         { text: '留言反馈', path: '/front/feedback' },
-      ]
+      ],
+      totalUnreadCount: 0,
+      ws: null
     }
   },
+  mounted() {
+    if (this.user.id) {
+      this.getUnreadCount();
+      this.initWebSocket();
+    }
+  },
+  beforeDestroy() {
+    this.closeWebSocket();
+  },
   methods: {
+    initWebSocket() {
+      if (typeof WebSocket === 'undefined') {
+        this.$message.error('您的浏览器不支持WebSocket');
+        return;
+      }
+      this.closeWebSocket();
+      
+      const wsUrl = `ws://${window.location.host}/chatServer/${this.user.id}`;
+      this.ws = new WebSocket(wsUrl);
+      
+      this.ws.onopen = () => {
+        console.log('WebSocket连接成功');
+      };
+      
+      this.ws.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data.type === 'chat' && data.toUserId === this.user.id) {
+            // 收到新消息，更新未读消息数
+            this.getUnreadCount();
+            
+            // 显示消息提醒
+            const h = this.$createElement;
+            this.$notify({
+              title: '新消息提醒',
+              message: h('div', { 
+                style: {
+                  display: 'flex',
+                  alignItems: 'center',
+                  cursor: 'pointer'
+                },
+                on: {
+                  click: () => {
+                    this.$router.push({
+                      path: '/front/chat',
+                      query: { toUserId: data.fromUserId }
+                    });
+                  }
+                }
+              }, [
+                h('img', {
+                  style: {
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '50%',
+                    marginRight: '8px'
+                  },
+                  attrs: {
+                    src: data.fromUserAvatar
+                  }
+                }),
+                h('div', [
+                  h('div', { style: { fontWeight: 'bold' } }, data.fromUserName),
+                  h('div', { style: { color: '#666' } }, data.content)
+                ])
+              ]),
+              type: 'success',
+              duration: 5000,
+              position: 'bottom-right'
+            });
+          }
+        } catch (error) {
+          console.error('解析WebSocket消息失败:', error);
+        }
+      };
+      
+      this.ws.onclose = () => {
+        console.log('WebSocket连接关闭');
+        setTimeout(() => {
+          this.initWebSocket();
+        }, 3000);
+      };
+      
+      this.ws.onerror = () => {
+        console.error('WebSocket连接错误');
+        this.closeWebSocket();
+      };
+    },
+    closeWebSocket() {
+      if (this.ws) {
+        this.ws.close();
+        this.ws = null;
+      }
+    },
+    getUnreadCount() {
+      this.$request.get('/chatGroup/selectUserGroup').then(res => {
+        if (res.code === '200') {
+          this.totalUnreadCount = res.data.reduce((total, chat) => total + (chat.chatNum || 0), 0);
+        }
+      });
+    },
     updateUser() {
-      this.user = JSON.parse(localStorage.getItem("xm-user") || '{}')
+      this.user = JSON.parse(localStorage.getItem("xm-user") || '{}');
+      if (this.user.id) {
+        this.getUnreadCount();
+        this.initWebSocket();
+      } else {
+        this.closeWebSocket();
+      }
+    },
+    goToChat() {
+      this.$router.push('/front/chat');
     },
     logout() {
       localStorage.removeItem("xm-user")
@@ -91,7 +206,7 @@ export default {
 
 <style scoped>
 .front-container {
-  background-color: #f8f8f8;
+  background-color: #f5f7fa;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -100,79 +215,267 @@ export default {
 .front-header {
   display: flex;
   align-items: center;
-  background-color: #409EFF;
+  background: linear-gradient(135deg, #40a9ff 0%, #1d39c4 100%);
   color: white;
   height: 64px;
-  padding: 0 20px;
+  padding: 0 50px;
   justify-content: space-between;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 .front-header-left {
   display: flex;
   align-items: center;
   text-decoration: none;
+  transition: all 0.3s;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+.front-header-left:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
 }
 
 .front-header-left .logo {
-  width: 40px;
-  height: 40px;
-  margin-right: 8px;
+  width: 36px;
+  height: 36px;
+  margin-right: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s;
+}
+
+.front-header-left:hover .logo {
+  transform: rotate(5deg);
 }
 
 .front-header-left .title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
   color: #fff;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .front-header-center {
   display: flex;
-  gap: 24px;
-  margin: 0 30px;
+  gap: 8px;
+  margin: 0 40px;
   flex-grow: 1;
   justify-content: center;
+  position: relative;
 }
 
 .menu {
   cursor: pointer;
-  font-size: 16px;
-  color: #eee;
-  transition: color 0.3s;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.85);
+  transition: all 0.3s;
+  padding: 8px 20px;
+  border-radius: 20px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.menu:hover,
+.menu::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: #fff;
+  transition: all 0.3s;
+  transform: translateX(-50%);
+  opacity: 0;
+}
+
+.menu:hover::before,
+.menu-active::before {
+  width: 80%;
+  opacity: 1;
+}
+
+.menu:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
 .menu-active {
-  color: #ffd04b;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+  font-weight: 500;
 }
 
 .front-header-chat {
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
+  color: rgba(255, 255, 255, 0.85);
+  margin-right: 25px;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 20px;
+  transition: all 0.3s;
+  background: rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.front-header-chat:hover {
   color: #fff;
-  margin-right: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.front-header-chat i {
+  margin-right: 6px;
+  font-size: 18px;
 }
 
 .front-header-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 15px;
+}
+
+.front-header-right :deep(.el-button--text) {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 15px;
+  padding: 8px 16px;
+  transition: all 0.3s;
+  height: auto;
+  border-radius: 20px;
+}
+
+.front-header-right :deep(.el-button--text:hover) {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
 }
 
 .user-info {
   display: flex;
   align-items: center;
   cursor: pointer;
+  padding: 6px 16px;
+  border-radius: 20px;
+  transition: all 0.3s;
+  background: rgba(255, 255, 255, 0.1);
+  gap: 8px;
+}
+
+.user-info:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .user-info .avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  margin-right: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s;
+  object-fit: cover;
+}
+
+.user-info:hover .avatar {
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+}
+
+.user-info span {
+  font-size: 15px;
+  color: #fff;
+}
+
+.user-info i {
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.user-info:hover i {
+  transform: rotate(180deg);
 }
 
 .main-body {
-  padding: 20px;
+  padding: 24px;
   flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+:deep(.el-dropdown-menu) {
+  padding: 8px;
+  border-radius: 12px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+:deep(.el-dropdown-menu__item) {
+  padding: 10px 20px;
+  font-size: 14px;
+  border-radius: 6px;
+  margin: 2px 0;
+  transition: all 0.3s;
+}
+
+:deep(.el-dropdown-menu__item:hover) {
+  background-color: #f0f7ff;
+  color: #1890ff;
+  transform: translateX(4px);
+}
+
+:deep(.el-dropdown-menu__item i) {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  z-index: 1;
+}
+
+.unread-badge {
+  position: absolute;
+  background-color: #ff4d4f;
+  color: white;
+  font-size: 12px;
+  padding: 0 6px;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(255, 77, 79, 0.4);
+  animation: badge-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes badge-pop {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 </style>

@@ -18,6 +18,12 @@ public class ChatInfo {
     private String isread;
     /** 时间 */
     private String time;
+    /** 内容类型 */
+    private String contentType;
+    /** 文件类型 */
+    private String fileType;
+    /** 文件URL */
+    private String fileUrl;
     private String chatUserName;
     private String chatUserAvatar;
     private String userName;
@@ -103,6 +109,30 @@ public class ChatInfo {
         this.time = time;
     }
 
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
+    }
+
     @Override
     public String toString() {
         return "ChatInfo{" +
@@ -112,6 +142,9 @@ public class ChatInfo {
                 ", text='" + text + '\'' +
                 ", isread='" + isread + '\'' +
                 ", time='" + time + '\'' +
+                ", contentType='" + contentType + '\'' +
+                ", fileType='" + fileType + '\'' +
+                ", fileUrl='" + fileUrl + '\'' +
                 ", chatUserName='" + chatUserName + '\'' +
                 ", chatUserAvatar='" + chatUserAvatar + '\'' +
                 ", userName='" + userName + '\'' +

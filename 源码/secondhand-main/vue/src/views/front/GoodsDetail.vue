@@ -1,79 +1,161 @@
 <template>
-  <div style="margin: 0 auto; padding: 10px 0; width: 50%">
-    <div style="display: flex; grid-gap: 20px; margin-bottom: 40px">
+  <div class="goods-detail-container">
+    <div class="goods-main-content">
       <!-- 商品图片 -->
-      <img :src="goods.img" alt="" style="width: 50%; height: 400px; display: block; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1)">
+      <div class="goods-image-container">
+        <img :src="goods.img" :alt="goods.name" class="goods-image">
+      </div>
 
       <!-- 商品信息 -->
-      <div style="flex: 1; width: 0">
+      <div class="goods-info-container">
         <div class="goods-info">
-          <div class="goods-title">{{ goods.name }}</div>
+          <h1 class="goods-title">{{ goods.name }}</h1>
 
           <div class="meta-info">
-            <span><i class="el-icon-view"></i> 浏览 {{ goods.readCount }}</span>
-            <span><i class="el-icon-thumb"></i> 点赞 {{ goods.likesCount }}</span>
-            <span><i class="el-icon-star-off"></i> 收藏 {{ goods.collectCount }}</span>
+            <span class="meta-item"><i class="el-icon-view"></i> {{ goods.readCount }} 浏览</span>
+            <span class="meta-item"><i class="el-icon-thumb"></i> {{ goods.likesCount }} 点赞</span>
+            <span class="meta-item"><i class="el-icon-star-off"></i> {{ goods.collectCount }} 收藏</span>
           </div>
 
-          <div class="goods-price">￥{{ goods.price }}</div>
-
-          <div class="detail-line"><span>发货地：</span>{{ goods.address }}</div>
-
-          <div class="detail-line seller-line">
-            <span>卖家：</span>
-            <img :src="goods.userAvatar" class="avatar" />
-            <span>{{ goods.userName }}</span>
-            <i @click="chat(goods.userId)" class="el-icon-chat-dot-round chat-icon"></i>
+          <div class="price-section">
+            <div class="goods-price">
+              <span class="price-symbol">¥</span>
+              <span class="price-value">{{ goods.price }}</span>
+            </div>
           </div>
 
-          <div class="detail-line"><span>发布日期：</span>{{ goods.date }}</div>
-        </div>
+          <div class="info-cards">
+            <div class="info-card">
+              <div class="info-card-label">
+                <i class="el-icon-location"></i>
+                发货地
+              </div>
+              <div class="info-card-value">{{ goods.address }}</div>
+            </div>
 
-        <!-- 按钮一行排布 -->
-        <div class="button-group">
-          <el-button v-if="!goods.userLikes" @click="addLikes" class="like-button">👍 点赞</el-button>
-          <el-button v-if="goods.userLikes" @click="addLikes" class="like-button liked">✅ 已点赞</el-button>
+            <div class="info-card">
+              <div class="info-card-label">
+                <i class="el-icon-time"></i>
+                发布时间
+              </div>
+              <div class="info-card-value">{{ goods.date }}</div>
+            </div>
+          </div>
 
-          <el-button v-if="!goods.userCollect" @click="addCollect" class="collect-button">❤️ 收藏</el-button>
-          <el-button v-if="goods.userCollect" @click="addCollect" class="collect-button collected">💔 已收藏</el-button>
+          <div class="seller-info">
+            <div class="seller-profile">
+              <img :src="goods.userAvatar" class="seller-avatar" />
+              <div class="seller-detail">
+                <span class="seller-name">{{ goods.userName }}</span>
+              </div>
+              <el-button type="text" @click="chat(goods.userId)" class="chat-link">
+                <i class="el-icon-chat-dot-round"></i> 联系卖家
+              </el-button>
+            </div>
+          </div>
 
-          <el-button class="chat-button" @click="chat(goods.userId)">💬 联系卖家</el-button>
-          <el-button class="buy-button" @click="handleBuy">立即购买</el-button>
+          <!-- 操作按钮组 -->
+          <div class="action-buttons">
+            <div class="action-row">
+              <el-button 
+                :class="['action-btn', 'like-btn', {'is-active': goods.userLikes}]"
+                @click="addLikes"
+              >
+                <i :class="goods.userLikes ? 'el-icon-success' : 'el-icon-thumb'"></i>
+                {{ goods.userLikes ? '已点赞' : '点赞' }}
+              </el-button>
+
+              <el-button 
+                :class="['action-btn', 'collect-btn', {'is-active': goods.userCollect}]"
+                @click="addCollect"
+              >
+                <i :class="goods.userCollect ? 'el-icon-star-on' : 'el-icon-star-off'"></i>
+                {{ goods.userCollect ? '已收藏' : '收藏' }}
+              </el-button>
+            </div>
+
+            <div class="action-row">
+              <el-button 
+                class="action-btn chat-btn"
+                @click="chat(goods.userId)"
+              >
+                <i class="el-icon-chat-dot-round"></i> 联系卖家
+              </el-button>
+
+              <el-button 
+                type="primary"
+                class="action-btn buy-btn"
+                @click="handleBuy"
+              >
+                立即购买
+              </el-button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 商品详情/评论切换 -->
-    <div>
-      <div style="display: flex; border-bottom: 1px solid orangered; margin-bottom: 10px">
-        <div style="padding: 10px 20px; cursor: pointer" :class="{ 'active' : current === '商品详情' }" @click="changeItem('商品详情')">商品详情</div>
-        <div style="padding: 10px 20px; cursor: pointer" :class="{ 'active' : current === '商品评论' }" @click="changeItem('商品评论')">商品评论</div>
+    <!-- 商品详情/评论区域 -->
+    <div class="goods-tabs">
+      <div class="tab-header">
+        <div 
+          class="tab-item" 
+          :class="{ active: current === '商品详情' }"
+          @click="changeItem('商品详情')"
+        >
+          商品详情
+        </div>
+        <div 
+          class="tab-item"
+          :class="{ active: current === '商品评论' }"
+          @click="changeItem('商品评论')"
+        >
+          商品评论
+        </div>
       </div>
 
-      <div v-if="current === '商品详情'">
-        <div v-html="goods.content"></div>
+      <div class="tab-content">
+        <div v-if="current === '商品详情'" class="detail-content" v-html="goods.content"></div>
+        <div v-if="current === '商品评论'" class="comment-content">
+          <Comment :fid="id" module="goods" />
+        </div>
       </div>
+    </div>
 
-      <div v-if="current === '商品评论'" class="card">
-        <Comment :fid="id" module="goods" />
-      </div>
-
-      <!-- 下单弹窗 -->
-      <el-dialog title="选择收货地址" :visible.sync="fromVisible" width="30%" :close-on-click-modal="false" destroy-on-close>
-        <div style="padding: 0 20px">
-          <el-radio-group v-model="form.addressId">
-            <el-radio v-for="item in addressList" :key="item.id" :label="item.id" style="margin-bottom: 10px">
-              {{ item.name + ' ' + item.address + ' ' + item.phone }}
+    <!-- 下单弹窗 -->
+    <el-dialog 
+      title="选择收货地址" 
+      :visible.sync="fromVisible" 
+      width="500px"
+      :close-on-click-modal="false"
+      destroy-on-close
+      custom-class="address-dialog"
+    >
+      <div class="address-list">
+        <el-radio-group v-model="form.addressId">
+          <div v-for="item in addressList" :key="item.id" class="address-item">
+            <el-radio :label="item.id">
+              <div class="address-info">
+                <div class="address-name">{{ item.name }}</div>
+                <div class="address-phone">{{ item.phone }}</div>
+                <div class="address-detail">{{ item.address }}</div>
+              </div>
             </el-radio>
-          </el-radio-group>
-          <a v-if="addressList.length === 0" href="/front/address" target="_blank">还没有收货地址？去创建</a>
+          </div>
+        </el-radio-group>
+        <div v-if="addressList.length === 0" class="no-address">
+          <i class="el-icon-location-information"></i>
+          <p>还没有收货地址</p>
+          <el-button type="primary" size="small" @click="$router.push('/front/address')">
+            去添加地址
+          </el-button>
         </div>
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="fromVisible = false">取 消</el-button>
-          <el-button type="primary" @click="addOrder">确 定</el-button>
-        </div>
-      </el-dialog>
-    </div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="fromVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addOrder">确认下单</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -101,8 +183,9 @@ export default {
   },
   methods: {
     chat(userId) {
-      this.$request.post('/chatGroup/add', { chatUserId: userId, userId: this.user.id }).then(() => {
-        this.$router.push('/front/chat');
+      this.$router.push({
+        path: '/front/chat',
+        query: { toUserId: userId }
       });
     },
     handleBuy() {
@@ -176,130 +259,371 @@ export default {
 </script>
 
 <style scoped>
-.active {
-  background-color: orangered;
-  color: #eee;
+.goods-detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
 }
 
-/* 右侧信息区域样式 */
-.goods-info {
+.goods-main-content {
+  display: grid;
+  grid-template-columns: 450px 1fr;
+  gap: 40px;
+  margin-bottom: 40px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.goods-image-container {
+  width: 450px;
+  height: 450px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.goods-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #f8f8f8;
+  transition: transform 0.3s;
+}
+
+.goods-image:hover {
+  transform: scale(1.02);
+}
+
+.goods-info-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-.goods-title {
-  font-size: 28px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 5px;
-}
-.meta-info {
-  display: flex;
-  gap: 20px;
-  font-size: 14px;
-  color: #888;
-  align-items: center;
-}
-.meta-info i {
-  margin-right: 4px;
-  color: #999;
-}
-.goods-price {
-  font-size: 26px;
-  color: #ff3c3c;
-  font-weight: bold;
-  margin: 10px 0;
-}
-.detail-line {
-  font-size: 15px;
-  color: #444;
-}
-.detail-line span {
-  font-weight: 500;
-  color: #888;
-  margin-right: 4px;
-}
-.seller-line {
-  display: flex;
-  align-items: center;
-}
-.avatar {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  margin: 0 6px;
-  object-fit: cover;
-  border: 1px solid #eee;
-}
-.chat-icon {
-  font-size: 16px;
-  margin-left: 6px;
-  color: #409EFF;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.chat-icon:hover {
-  transform: scale(1.2);
 }
 
-/* 按钮组样式 */
-.button-group {
+.goods-info {
+  flex: 1;
   display: flex;
-  flex-wrap: nowrap;
-  gap: 12px;
+  flex-direction: column;
+}
+
+.goods-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 16px;
+  line-height: 1.4;
+}
+
+.meta-info {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.meta-item {
+  display: flex;
   align-items: center;
-  margin-top: 30px;
+  gap: 6px;
+  color: #666;
+  font-size: 14px;
 }
-.el-button {
-  min-width: 100px;
-  height: 40px;
+
+.meta-item i {
+  color: #999;
+  font-size: 16px;
+}
+
+.price-section {
+  background: #fff9f9;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.goods-price {
+  display: flex;
+  align-items: baseline;
+}
+
+.price-symbol {
+  color: #ff4d4f;
+  font-size: 18px;
+  margin-right: 4px;
+}
+
+.price-value {
+  color: #ff4d4f;
+  font-size: 32px;
   font-weight: bold;
-  transition: all 0.3s ease;
-  white-space: nowrap;
 }
-.like-button {
-  background-color: #ff7f50;
+
+.info-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.info-card {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.3s;
+}
+
+.info-card:hover {
+  background: #f0f2f5;
+  transform: translateY(-2px);
+}
+
+.info-card-label {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.info-card-label i {
+  font-size: 16px;
+  color: #1890ff;
+}
+
+.info-card-value {
+  color: #333;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.seller-info {
+  background: #f8f8f8;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.seller-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.seller-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.seller-detail {
+  flex: 1;
+}
+
+.seller-name {
+  color: #333;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.chat-link {
+  color: #1890ff;
+  font-size: 14px;
+  padding: 0;
+}
+
+.chat-link:hover {
+  color: #40a9ff;
+}
+
+.action-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.action-row {
+  display: flex;
+  gap: 12px;
+}
+
+.action-btn {
+  flex: 1;
+  height: 40px;
+  border-radius: 20px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.3s;
+}
+
+.action-btn i {
+  font-size: 16px;
+}
+
+.like-btn {
+  background: #fff2e8;
+  border-color: #ffbb96;
+  color: #fa541c;
+}
+
+.like-btn:hover, .like-btn.is-active {
+  background: #fa541c;
+  border-color: #fa541c;
   color: #fff;
-  border: none;
 }
-.like-button:hover {
-  background-color: #ff4500;
-  transform: scale(1.05);
+
+.collect-btn {
+  background: #fff7e6;
+  border-color: #ffd591;
+  color: #fa8c16;
 }
-.liked {
-  background-color: #aaa !important;
+
+.collect-btn:hover, .collect-btn.is-active {
+  background: #fa8c16;
+  border-color: #fa8c16;
   color: #fff;
 }
-.collect-button {
-  background-color: #f6c344;
+
+.chat-btn {
+  background: #e6f7ff;
+  border-color: #91d5ff;
+  color: #1890ff;
+}
+
+.chat-btn:hover {
+  background: #1890ff;
+  border-color: #1890ff;
   color: #fff;
-  border: none;
 }
-.collect-button:hover {
-  background-color: #e8a600;
-  transform: scale(1.05);
-}
-.collected {
-  background-color: #888 !important;
+
+.buy-btn {
+  background: #ff4d4f;
+  border-color: #ff4d4f;
   color: #fff;
+  font-size: 15px;
+  font-weight: 500;
 }
-.chat-button {
-  border: 1px solid #409EFF;
-  color: #409EFF;
-  background-color: #fff;
+
+.buy-btn:hover {
+  background: #ff7875;
+  border-color: #ff7875;
 }
-.chat-button:hover {
-  background-color: #409EFF;
-  color: #fff;
-  transform: scale(1.05);
+
+.goods-tabs {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 }
-.buy-button {
-  background-color: #ff0055;
-  color: #fff;
-  border: none;
+
+.tab-header {
+  display: flex;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
 }
-.buy-button:hover {
-  background-color: #e6004c;
-  transform: scale(1.05);
+
+.tab-item {
+  padding: 16px 30px;
+  font-size: 15px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.tab-item:hover {
+  color: #1890ff;
+}
+
+.tab-item.active {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #1890ff;
+}
+
+.tab-content {
+  min-height: 200px;
+  padding: 24px;
+}
+
+.detail-content {
+  color: #666;
+  line-height: 1.8;
+}
+
+/* 地址选择弹窗样式 */
+.address-dialog {
+  border-radius: 12px;
+}
+
+.address-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.address-item {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.address-item:last-child {
+  border-bottom: none;
+}
+
+.address-info {
+  margin-left: 24px;
+  color: #666;
+}
+
+.address-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.address-phone {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.address-detail {
+  font-size: 14px;
+  color: #999;
+}
+
+.no-address {
+  text-align: center;
+  padding: 40px 0;
+  color: #999;
+}
+
+.no-address i {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.no-address p {
+  margin-bottom: 16px;
 }
 </style>

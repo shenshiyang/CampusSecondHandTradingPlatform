@@ -1,5 +1,4 @@
 server:
-  ip: 10.102.76.92
   port: 9090
   address: 0.0.0.0
 
@@ -9,7 +8,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: root
-    url: jdbc:mysql://localhost:3306/secondhand?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/secondhand?useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
 
   servlet:
     multipart:
