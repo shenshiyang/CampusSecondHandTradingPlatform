@@ -39,21 +39,31 @@
           <el-tag type="danger" v-if="row.status === '拒绝'">拒绝</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="180" align="center">
+      <el-table-column label="操作" width="280" align="center">
         <template #default="{ row }">
-          <el-button
-            v-if="row.status !== '通过'"
-            size="mini"
-            type="success"
-            plain
-            @click="handleEdit(row)"
-          >编辑</el-button>
-          <el-button
-            size="mini"
-            type="danger"
-            plain
-            @click="del(row.id)"
-          >删除</el-button>
+          <div class="btn-group">
+            <el-button
+              v-if="row.status !== '通过'"
+              size="mini"
+              type="success"
+              plain
+              @click="handleEdit(row)"
+            >编辑</el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              plain
+              @click="del(row.id)"
+            >删除</el-button>
+            <el-button
+              size="mini"
+              :type="row.solved === '已解决' ? 'info' : 'warning'"
+              plain
+              @click="toggleSolved(row)"
+            >
+              {{ row.solved === '已解决' ? '标记未解决' : '标记已解决' }}
+            </el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -218,6 +228,21 @@ export default {
             : this.$message.error(msg)
         })
         .catch(() => {})
+    },
+
+    /* ---------- 切换求助状态 ---------- */
+    async toggleSolved(row) {
+      const newStatus = row.solved === '已解决' ? '未解决' : '已解决'
+      try {
+        await this.$request.post('/help/updateSolvedStatus', {
+          id: row.id,
+          solved: newStatus
+        })
+        row.solved = newStatus
+        this.$message.success('状态更新成功')
+      } catch (error) {
+        this.$message.error('操作失败：' + error.message)
+      }
     }
   }
 }

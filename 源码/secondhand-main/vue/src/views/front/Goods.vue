@@ -192,20 +192,73 @@ export default {
 /* Container Styling */
 .goods-container {
   width: 90%;
+  max-width: 1400px;
   margin: 30px auto;
+  padding: 0 20px;
 }
 
 /* Card Box Styling */
 .card-box {
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border-radius: 12px;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+  background: #fff;
 }
 
-/* Pagination Bar Styling */
-.pagination-bar {
-  margin-top: 20px;
-  text-align: center;
+/* Table Styling */
+:deep(.el-table) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:deep(.el-table th) {
+  background-color: #fafafa;
+  color: #333;
+  font-weight: 500;
+  padding: 12px 0;
+  font-size: 14px;
+}
+
+:deep(.el-table td) {
+  padding: 16px 0;
+}
+
+:deep(.el-table--striped .el-table__body tr.el-table__row--striped td) {
+  background: #fafafa;
+}
+
+:deep(.el-table--border) {
+  border-color: #f0f0f0;
+}
+
+:deep(.el-table--border th), :deep(.el-table--border td) {
+  border-color: #f0f0f0;
+}
+
+/* Price Text Styling */
+.price-text {
+  color: #ff4d4f;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+/* Status Tag Styling */
+:deep(.el-tag) {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+:deep(.el-tag--success) {
+  background: rgba(82, 196, 26, 0.1);
+  border-color: rgba(82, 196, 26, 0.2);
+  color: #52c41a;
+}
+
+:deep(.el-tag--info) {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #666;
 }
 
 /* Button Group Styling */
@@ -213,24 +266,132 @@ export default {
   display: flex;
   gap: 8px;
   justify-content: center;
-  flex-wrap: wrap;
+  align-items: center;
 }
 
-.el-button {
-  margin-top: 5px;
+:deep(.el-button--mini) {
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all 0.3s;
 }
 
-/* Hover Effects for Buttons */
-.el-button:hover {
-  background-color: #f0f0f0;
+:deep(.el-button--mini:hover) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Operation Buttons Styling */
+:deep(.el-button--primary) {
+  background: #1890ff;
+  border-color: #1890ff;
+}
+
+:deep(.el-button--primary:hover) {
+  background: #40a9ff;
+  border-color: #40a9ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+}
+
+:deep(.el-button--danger) {
+  background: #ff4d4f;
+  border-color: #ff4d4f;
+  color: #fff;
+}
+
+:deep(.el-button--danger:hover) {
+  background: #ff7875;
+  border-color: #ff7875;
+  box-shadow: 0 2px 8px rgba(255, 77, 79, 0.2);
+}
+
+:deep(.el-button--warning) {
+  background: #faad14;
+  border-color: #faad14;
+  color: #fff;
+}
+
+:deep(.el-button--warning:hover) {
+  background: #ffc53d;
+  border-color: #ffc53d;
+  box-shadow: 0 2px 8px rgba(250, 173, 20, 0.2);
+}
+
+:deep(.el-button--success) {
+  background: #52c41a;
+  border-color: #52c41a;
+  color: #fff;
+}
+
+:deep(.el-button--success:hover) {
+  background: #73d13d;
+  border-color: #73d13d;
+  box-shadow: 0 2px 8px rgba(82, 196, 26, 0.2);
+}
+
+/* Pagination Bar Styling */
+.pagination-bar {
+  margin-top: 25px;
+  text-align: center;
+  padding: 10px 0;
+}
+
+:deep(.el-pagination.is-background .el-pager li:not(.disabled).active) {
+  background-color: #1890ff;
+  color: #fff;
+}
+
+:deep(.el-pagination.is-background .el-pager li:not(.disabled):hover) {
+  color: #1890ff;
 }
 
 /* Stock Dialog Styling */
+:deep(.el-dialog) {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+:deep(.el-dialog__header) {
+  background: #fafafa;
+  padding: 15px 20px;
+  margin: 0;
+}
+
+:deep(.el-dialog__title) {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+:deep(.el-dialog__body) {
+  padding: 30px 20px;
+}
+
 .stock-input {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+}
+
+:deep(.el-input-number) {
+  width: 100%;
+}
+
+:deep(.el-input-number__increase), :deep(.el-input-number__decrease) {
+  background-color: #fafafa;
+  border-color: #e8e8e8;
+  color: #666;
 }
 
 .dialog-footer {
   text-align: right;
+  padding-top: 10px;
+}
+
+/* Empty State Styling */
+:deep(.el-table__empty-block) {
+  min-height: 200px;
+}
+
+:deep(.el-table__empty-text) {
+  color: #999;
+  font-size: 14px;
 }
 </style>

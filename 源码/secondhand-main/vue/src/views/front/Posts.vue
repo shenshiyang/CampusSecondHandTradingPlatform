@@ -1,68 +1,100 @@
 <template>
   <div class="posts-page">
-    <!-- ▍圈子筛选 -->
-    <section class="circle-wrap">
-      <!-- 「全部」 -->
-      <div
-        class="circle-card"
-        :class="{ active: circle === '全部' }"
-        @click="loadCircle('全部')"
-      >
-        <img src="@/assets/imgs/全部.png" />
-        <span>全部</span>
-      </div>
+    <!-- 圈子筛选区 -->
+    <section class="circle-section">
+      <h2 class="section-title">
+        <i class="el-icon-collection-tag"></i>
+        圈子分类
+      </h2>
+      <div class="circle-wrap">
+        <!-- 「全部」选项 -->
+        <div
+          class="circle-card"
+          :class="{ active: circle === '全部' }"
+          @click="loadCircle('全部')"
+        >
+          <div class="circle-icon">
+            <img src="@/assets/imgs/全部.png" alt="全部" />
+          </div>
+          <span>全部</span>
+        </div>
 
-      <!-- 其余圈子 -->
-      <div
-        v-for="c in circles"
-        :key="c.id"
-        class="circle-card"
-        :class="{ active: circle === c.name }"
-        @click="loadCircle(c.name)"
-      >
-        <img :src="c.img" />
-        <span>{{ c.name }}</span>
+        <!-- 其余圈子 -->
+        <div
+          v-for="c in circles"
+          :key="c.id"
+          class="circle-card"
+          :class="{ active: circle === c.name }"
+          @click="loadCircle(c.name)"
+        >
+          <div class="circle-icon">
+            <img :src="c.img" :alt="c.name" />
+          </div>
+          <span>{{ c.name }}</span>
+        </div>
       </div>
     </section>
 
-    <!-- ▍帖子列表 / 骨架屏  —— 保证 v-if / v-else 相邻 -->
-    <section>
+    <!-- 帖子列表区 -->
+    <section class="posts-section">
+      <h2 class="section-title">
+        <i class="el-icon-document"></i>
+        {{ circle === '全部' ? '全部帖子' : circle + '圈子' }}
+      </h2>
+
+      <!-- 骨架屏 -->
       <template v-if="loading">
-        <el-skeleton :rows="5" animated />
+        <el-skeleton :rows="5" animated class="post-skeleton" />
       </template>
 
+      <!-- 帖子列表 -->
       <template v-else>
-        <el-card
-          v-for="p in tableData"
-          :key="p.id"
-          class="post-card"
-          shadow="hover"
-          @click.native="$router.push(`/front/postsDetail?id=${p.id}`)"
-        >
-          <div class="post-main">
-            <!-- 文字区 -->
-            <div class="post-body">
-              <h3 class="post-title">{{ p.title }}</h3>
-              <p class="post-descr">{{ p.descr }}</p>
-              <div class="post-meta">
-                <span><i class="el-icon-user" /> {{ p.userName }}</span>
-                <span><i class="el-icon-time" /> {{ p.time }}</span>
-                <span><i class="el-icon-reading" /> {{ p.readCount }}</span>
+        <transition-group name="post-list">
+          <el-card
+            v-for="p in tableData"
+            :key="p.id"
+            class="post-card"
+            shadow="hover"
+            @click.native="$router.push(`/front/postsDetail?id=${p.id}`)"
+          >
+            <div class="post-main">
+              <!-- 文字区 -->
+              <div class="post-body">
+                <h3 class="post-title">{{ p.title }}</h3>
+                <p class="post-descr">{{ p.descr }}</p>
+                <div class="post-meta">
+                  <span class="meta-item">
+                    <i class="el-icon-user" />
+                    <span class="meta-text">{{ p.userName }}</span>
+                  </span>
+                  <span class="meta-item">
+                    <i class="el-icon-time" />
+                    <span class="meta-text">{{ p.time }}</span>
+                  </span>
+                  <span class="meta-item">
+                    <i class="el-icon-reading" />
+                    <span class="meta-text">{{ p.readCount }}次阅读</span>
+                  </span>
+                </div>
               </div>
+
+              <!-- 缩略图 -->
+              <el-image
+                v-if="p.img"
+                :src="p.img"
+                :preview-src-list="[p.img]"
+                class="post-img"
+                fit="cover"
+              >
+                <div slot="error" class="image-error">
+                  <i class="el-icon-picture-outline"></i>
+                </div>
+              </el-image>
             </div>
+          </el-card>
+        </transition-group>
 
-            <!-- 缩略图 -->
-            <el-image
-              v-if="p.img"
-              :src="p.img"
-              :preview-src-list="[p.img]"
-              class="post-img"
-              fit="cover"
-            />
-          </div>
-        </el-card>
-
-        <!-- 分页 -->
+        <!-- 分页器 -->
         <el-pagination
           v-if="total"
           class="pager"
@@ -141,70 +173,228 @@ export default {
 
 <style scoped>
 .posts-page {
-  width: 60%;
-  margin: 20px auto;
+  width: 80%;
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 20px;
 }
 
-/* 圈子 */
+/* 区块标题 */
+.section-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: #303133;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title i {
+  color: #409EFF;
+  font-size: 24px;
+}
+
+/* 圈子区域 */
+.circle-section {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+}
+
 .circle-wrap {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 16px;
 }
+
 .circle-card {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 8px 12px;
-  border-radius: 4px;
+  padding: 16px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  background: #f5f7fa;
+  min-width: 100px;
 }
-.circle-card img {
-  width: 46px;
-  height: 46px;
-  margin-right: 6px;
+
+.circle-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 8px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-.circle-card:hover,
+
+.circle-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.circle-card span {
+  font-size: 14px;
+  color: #606266;
+}
+
+.circle-card:hover {
+  transform: translateY(-2px);
+  background: #ecf5ff;
+}
+
 .circle-card.active {
-  background: #ffedd8;
+  background: #409EFF;
+  color: #fff;
+}
+
+.circle-card.active span {
+  color: #fff;
+}
+
+/* 帖子区域 */
+.posts-section {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+}
+
+.post-skeleton {
+  padding: 20px;
 }
 
 /* 帖子卡片 */
 .post-card {
-  margin-bottom: 14px;
+  margin-bottom: 20px;
   cursor: pointer;
-}
-.post-main {
-  display: flex;
-  gap: 10px;
-}
-.post-body {
-  flex: 1;
-}
-.post-title {
-  font-size: 18px;
-  margin-bottom: 6px;
-}
-.post-descr {
-  color: #666;
-  margin-bottom: 8px;
-}
-.post-meta {
-  color: #909399;
-  font-size: 13px;
-  display: flex;
-  gap: 18px;
-}
-.post-img {
-  width: 90px;
-  height: 90px;
-  border-radius: 4px;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-/* 分页 */
+.post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.post-main {
+  display: flex;
+  gap: 20px;
+  padding: 10px;
+}
+
+.post-body {
+  flex: 1;
+  overflow: hidden;
+}
+
+.post-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: #303133;
+  margin-bottom: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.post-descr {
+  color: #606266;
+  margin-bottom: 16px;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.post-meta {
+  display: flex;
+  gap: 24px;
+  color: #909399;
+  font-size: 13px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.meta-item i {
+  font-size: 16px;
+}
+
+.post-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.image-error {
+  width: 100%;
+  height: 100%;
+  background: #f5f7fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #909399;
+  font-size: 24px;
+}
+
+/* 分页器 */
 .pager {
-  margin-top: 22px;
+  margin-top: 30px;
   text-align: center;
+  padding-bottom: 20px;
+}
+
+/* 列表动画 */
+.post-list-enter-active, .post-list-leave-active {
+  transition: all 0.5s ease;
+}
+
+.post-list-enter, .post-list-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.post-list-move {
+  transition: transform 0.5s ease;
+}
+
+/* 响应式调整 */
+@media screen and (max-width: 768px) {
+  .posts-page {
+    width: 95%;
+    padding: 0 10px;
+  }
+
+  .post-main {
+    flex-direction: column;
+  }
+
+  .post-img {
+    width: 100%;
+    height: 200px;
+  }
+
+  .circle-card {
+    min-width: 80px;
+    padding: 12px;
+  }
 }
 </style>

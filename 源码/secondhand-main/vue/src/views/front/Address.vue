@@ -193,14 +193,136 @@ export default {
 
 <style scoped>
 .address-page {
-  width: 60%;
-  margin: 20px auto;
+  width: 80%;
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 20px;
 }
+
 .toolbar {
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 12px;
 }
+
+.toolbar .el-button {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.toolbar .el-button--primary {
+  background: #1890ff;
+  border-color: #1890ff;
+}
+
+.toolbar .el-button--primary:hover {
+  background: #40a9ff;
+  border-color: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+}
+
+.toolbar .el-button--danger {
+  background: #ff4d4f;
+  border-color: #ff4d4f;
+  color: #fff;
+}
+
+.toolbar .el-button--danger:hover {
+  background: #ff7875;
+  border-color: #ff7875;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.2);
+}
+
+:deep(.el-card) {
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+  margin-bottom: 20px;
+}
+
+:deep(.el-table) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:deep(.el-table th) {
+  background-color: #fafafa;
+  color: #333;
+  font-weight: 500;
+  padding: 12px 0;
+}
+
+:deep(.el-table td) {
+  padding: 12px 0;
+}
+
+:deep(.el-table--striped .el-table__body tr.el-table__row--striped td) {
+  background: #fafafa;
+}
+
+:deep(.el-button--mini) {
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+:deep(.el-button--mini:hover) {
+  transform: translateY(-1px);
+}
+
 .pager {
-  margin-top: 15px;
+  margin-top: 20px;
   text-align: center;
+  padding: 10px 0;
+}
+
+:deep(.el-dialog) {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+:deep(.el-dialog__header) {
+  background: #fafafa;
+  padding: 15px 20px;
+  margin: 0;
+}
+
+:deep(.el-dialog__title) {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+:deep(.el-dialog__body) {
+  padding: 30px 20px;
+}
+
+:deep(.el-dialog__footer) {
+  border-top: 1px solid #f0f0f0;
+  padding: 15px 20px;
+}
+
+:deep(.el-form-item__label) {
+  font-weight: 500;
+  color: #333;
+}
+
+:deep(.el-input__inner) {
+  border-radius: 6px;
+  padding: 0 15px;
+  height: 38px;
+  line-height: 38px;
+  border-color: #e8e8e8;
+}
+
+:deep(.el-input__inner:hover) {
+  border-color: #40a9ff;
+}
+
+:deep(.el-input__inner:focus) {
+  border-color: #1890ff;
 }
 </style>

@@ -1,28 +1,58 @@
 <template>
   <div class="search-page">
-    <!-- ▍搜索栏 -->
-    <div class="search-bar">
-      <el-input
-        v-model.trim="name"
-        placeholder="请输入商品关键字"
-        clearable
-        class="search-input"
-        @keyup.enter.native="loadGoods(1)"
-      />
-      <el-button type="primary" size="mini" @click="loadGoods(1)">搜索</el-button>
-      <el-button type="warning" size="mini" @click="reset">重置</el-button>
-    </div>
+    <!-- 搜索栏 -->
+    <el-card class="search-card" shadow="hover">
+      <div class="search-header">
+        <h2 class="search-title">
+          <i class="el-icon-search"></i>
+          商品搜索
+        </h2>
+      </div>
+      
+      <div class="search-bar">
+        <el-input
+          v-model.trim="name"
+          placeholder="输入商品关键字搜索..."
+          prefix-icon="el-icon-search"
+          clearable
+          class="search-input"
+          @keyup.enter.native="loadGoods(1)"
+        />
+        <el-button 
+          type="primary" 
+          icon="el-icon-search"
+          @click="loadGoods(1)"
+        >搜索</el-button>
+        <el-button 
+          type="warning" 
+          icon="el-icon-refresh"
+          @click="reset"
+        >重置</el-button>
+      </div>
+    </el-card>
 
-    <!-- ▍结果列表 -->
-    <el-card shadow="never">
-      <el-row :gutter="15">
+    <!-- 结果列表 -->
+    <div class="search-result" v-if="goodsList.length || name">
+      <div class="result-header">
+        <h3 class="result-title">
+          <i class="el-icon-goods"></i>
+          搜索结果
+          <span class="result-count" v-if="total">（共 {{ total }} 个商品）</span>
+        </h3>
+      </div>
+
+      <el-row :gutter="20">
         <el-col
           v-for="g in goodsList"
           :key="g.id"
-          :span="6"
+          :xs="12"
+          :sm="8"
+          :md="6"
+          :lg="6"
         >
-          <div
-            class="goods-item"
+          <el-card 
+            class="goods-item" 
+            shadow="hover"
             @click="$router.push(`/front/goodsDetail?id=${g.id}`)"
           >
             <el-image
@@ -30,21 +60,44 @@
               class="goods-img"
               fit="cover"
               :preview-src-list="[g.img]"
-            />
-            <p class="goods-name line2">{{ g.name }}</p>
-            <div class="goods-meta">
-              <strong class="price">￥{{ g.price }}</strong>
-              <span>{{ g.readCount }} 浏览</span>
-              <span>{{ g.likesCount }} 点赞</span>
+            >
+              <div slot="error" class="image-error">
+                <i class="el-icon-picture-outline"></i>
+              </div>
+            </el-image>
+
+            <div class="goods-info">
+              <p class="goods-name line2">{{ g.name }}</p>
+              <div class="goods-meta">
+                <strong class="price">￥{{ g.price }}</strong>
+                <div class="meta-stats">
+                  <span class="meta-item">
+                    <i class="el-icon-view"></i>
+                    {{ g.readCount }}
+                  </span>
+                  <span class="meta-item">
+                    <i class="el-icon-star-off"></i>
+                    {{ g.likesCount }}
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
+          </el-card>
         </el-col>
       </el-row>
 
-      <!-- ▍分页 -->
+      <!-- 空状态 -->
+      <el-empty
+        v-if="!goodsList.length && name"
+        description="暂无相关商品"
+      >
+        <el-button type="primary" @click="reset">重新搜索</el-button>
+      </el-empty>
+
+      <!-- 分页器 -->
       <el-pagination
         v-if="total"
-        class="pager"
+        class="pagination"
         background
         layout="total, prev, pager, next"
         :current-page="pageNum"
@@ -53,7 +106,13 @@
         :page-sizes="[8, 16, 24]"
         @current-change="handleCurrentChange"
       />
-    </el-card>
+    </div>
+
+    <!-- 初始状态 -->
+    <div v-else class="empty-state">
+      <i class="el-icon-search empty-icon"></i>
+      <p class="empty-text">输入关键字开始搜索</p>
+    </div>
   </div>
 </template>
 
@@ -73,7 +132,6 @@ export default {
     this.loadGoods()
   },
   watch: {
-    // 当从其他页面携带 query 返回时自动刷新
     '$route.query.name'(val) {
       this.name = val || ''
       this.loadGoods(1)
@@ -100,7 +158,7 @@ export default {
       this.loadGoods(page)
     },
     reset() {
-      this.$router.replace('/front/search') // 清除 query
+      this.$router.replace('/front/search')
       this.name = ''
       this.loadGoods(1)
     }
@@ -110,57 +168,193 @@ export default {
 
 <style scoped>
 .search-page {
-  width: 70%;
-  margin: 20px auto;
+  width: 80%;
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 20px;
 }
+
+/* 搜索卡片 */
+.search-card {
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.search-header {
+  margin-bottom: 20px;
+}
+
+.search-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  color: #303133;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-title i {
+  color: #409EFF;
+  font-size: 24px;
+}
+
 .search-bar {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
+  gap: 10px;
 }
+
 .search-input {
-  width: 300px;
-  margin-right: 10px;
+  width: 400px;
 }
+
+/* 结果区域 */
+.search-result {
+  margin-top: 30px;
+}
+
+.result-header {
+  margin-bottom: 20px;
+}
+
+.result-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #303133;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.result-title i {
+  color: #409EFF;
+  font-size: 20px;
+}
+
+.result-count {
+  font-size: 14px;
+  color: #909399;
+  font-weight: normal;
+}
+
+/* 商品卡片 */
 .goods-item {
+  margin-bottom: 20px;
   cursor: pointer;
-  margin-bottom: 18px;
-  transition: transform 0.25s;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
+
 .goods-item:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
 }
+
 .goods-img {
   width: 100%;
-  height: 240px;
-  border-radius: 4px;
-  margin-bottom: 8px;
+  height: 200px;
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
 }
+
+.image-error {
+  width: 100%;
+  height: 100%;
+  background: #f5f7fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #909399;
+  font-size: 30px;
+}
+
+.goods-info {
+  padding: 12px;
+}
+
 .goods-name {
   font-size: 15px;
-  color: #555;
-  margin-bottom: 6px;
+  color: #303133;
+  margin: 0 0 10px;
+  line-height: 1.5;
+  height: 44px;
 }
+
 .goods-meta {
-  font-size: 13px;
-  color: #666;
   display: flex;
-  gap: 14px;
-  align-items: baseline;
+  justify-content: space-between;
+  align-items: center;
 }
+
 .price {
   color: #ff4d4f;
-  font-size: 18px;
+  font-size: 20px;
 }
-.pager {
-  margin-top: 18px;
+
+.meta-stats {
+  display: flex;
+  gap: 12px;
+}
+
+.meta-item {
+  color: #909399;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.meta-item i {
+  font-size: 14px;
+}
+
+/* 分页器 */
+.pagination {
+  margin-top: 30px;
   text-align: center;
 }
-.line2 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2; 
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 60px 0;
+  color: #909399;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.empty-text {
+  font-size: 16px;
+  margin: 0;
+}
+
+/* 响应式调整 */
+@media screen and (max-width: 768px) {
+  .search-page {
+    width: 95%;
+    padding: 0 10px;
+  }
+
+  .search-bar {
+    flex-direction: column;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .goods-img {
+    height: 160px;
+  }
+
+  .price {
+    font-size: 18px;
+  }
 }
 </style>

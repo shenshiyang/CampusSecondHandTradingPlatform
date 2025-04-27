@@ -12,7 +12,7 @@
         <div class="user-info">
           <div class="user-name">{{ item.chatUserName }}</div>
           <div class="last-msg">{{ item.lastMessage }}</div>
-          <span v-if="item.unreadCount" class="chat-unread-count">{{ item.unreadCount }}</span>
+          <span v-if="item.chatNum && item.chatNum > 0" class="unread-count">{{ item.chatNum }}</span>
         </div>
       </div>
     </div>
@@ -197,7 +197,7 @@ export default {
       return this.$request.get('/chatGroup/selectUserGroup').then(res => {
         if (res.code === '200') {
           this.userList = res.data;
-          // 不再触发顶部导航栏的未读消息更新
+          console.log('聊天用户列表:', this.userList); // 添加日志查看数据
         }
       });
     },
@@ -206,15 +206,16 @@ export default {
       this.active = item.chatUserId;
       this.activeUserAvatar = item.chatUserAvatar;
       this.processedMessageKeys.clear();
-      this.$request.put(`/chatInfo/updateRead/${item.chatUserId}`);
-      this.loadChatRecord();
+      
       // 清除未读消息数
-      if (item.unreadCount) {
-        const index = this.userList.findIndex(u => u.chatUserId === item.chatUserId);
-        if (index !== -1) {
-          this.$set(this.userList[index], 'unreadCount', 0);
-        }
+      const index = this.userList.findIndex(u => u.chatUserId === item.chatUserId);
+      if (index !== -1 && this.userList[index].chatNum) {
+        this.$set(this.userList[index], 'chatNum', 0);
+        // 更新服务器端的已读状态
+        this.$request.put(`/chatInfo/updateRead/${item.chatUserId}`);
       }
+      
+      this.loadChatRecord();
     },
     loadChatRecord() {
       this.$request.get(`/chatInfo/selectUserChat/${this.active}`).then(res => {
@@ -509,11 +510,10 @@ export default {
       // 实现图片预览逻辑
     },
     updateUnreadCount(fromUserId) {
-      // 只更新聊天列表中的未读消息数
       const userIndex = this.userList.findIndex(u => u.chatUserId === fromUserId);
       if (userIndex !== -1) {
-        const currentCount = this.userList[userIndex].unreadCount || 0;
-        this.$set(this.userList[userIndex], 'unreadCount', currentCount + 1);
+        const currentCount = this.userList[userIndex].chatNum || 0;
+        this.$set(this.userList[userIndex], 'chatNum', currentCount + 1);
       }
     },
     onMessage(e) {
@@ -528,11 +528,6 @@ export default {
             return;
           }
 
-          // 如果是接收到的消息且不是当前聊天对象，更新未读消息数
-          if (data.toUserId === this.user.id && data.fromUserId !== this.active) {
-            this.updateUnreadCount(data.fromUserId);
-          }
-
           // 生成消息的唯一标识
           const messageKey = `${data.fromUserId}-${data.toUserId}-${data.timestamp}`;
           
@@ -544,6 +539,17 @@ export default {
           
           // 记录消息已处理
           this.processedMessageKeys.add(messageKey);
+          
+          // 限制已处理消息键集合的大小
+          if (this.processedMessageKeys.size > 100) {
+            const keysArray = Array.from(this.processedMessageKeys);
+            this.processedMessageKeys = new Set(keysArray.slice(-50));
+          }
+
+          // 如果是接收到的消息且不是当前聊天对象，更新未读消息数
+          if (data.toUserId === this.user.id && data.fromUserId !== this.active) {
+            this.updateUnreadCount(data.fromUserId);
+          }
 
           // 如果是当前聊天对象的消息
           if ((data.fromUserId === this.active && data.toUserId === this.user.id) || 
@@ -588,13 +594,10 @@ export default {
             );
 
             if (existingMsgIndex === -1) {
-              // 只有不存在相同消息时才添加
               this.$set(this.chatList, this.chatList.length, newMsg);
               
-              // 如果是收到的消息，标记为已读并发送确认
               if (data.toUserId === this.user.id) {
                 this.$request.put(`/chatInfo/updateRead/${data.fromUserId}`);
-                // 发送消息确认
                 if (this.ws && this.ws.readyState === WebSocket.OPEN) {
                   const ack = {
                     type: 'ack',
@@ -687,7 +690,7 @@ export default {
 .user-info {
   flex: 1;
   min-width: 0;
-  position: relative; /* 添加相对定位 */
+  position: relative;
 }
 
 .user-name {
@@ -706,9 +709,9 @@ export default {
 }
 
 /* 新增：聊天列表中的未读消息提示 */
-.chat-unread-count {
+.unread-count {
   position: absolute;
-  right: 5px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   background: #f56c6c;
@@ -720,6 +723,20 @@ export default {
   text-align: center;
   font-size: 12px;
   padding: 0 6px;
+  box-shadow: 0 2px 6px rgba(255, 77, 79, 0.4);
+  animation: badge-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 1;
+}
+
+@keyframes badge-pop {
+  from {
+    transform: scale(0) translateY(-50%);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(-50%);
+    opacity: 1;
+  }
 }
 
 .chat-main {

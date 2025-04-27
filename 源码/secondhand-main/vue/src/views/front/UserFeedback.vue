@@ -1,54 +1,117 @@
 <template>
-  <div class="feedback-page card">
-    <!-- ▍查询栏 -->
-    <div class="search-bar">
-      <el-input
-        v-model.trim="keyword"
-        placeholder="请输入关键字查询"
-        clearable
-        class="search-input"
-        @keyup.enter.native="load(1)"
+  <div class="feedback-page">
+    <el-card class="main-card" shadow="hover">
+      <!-- 页面标题和搜索栏 -->
+      <div class="header-section">
+        <h2 class="page-title">
+          <i class="el-icon-chat-line-round"></i>
+          我的反馈
+        </h2>
+        <div class="search-bar">
+          <el-input
+            v-model.trim="keyword"
+            placeholder="搜索反馈主题..."
+            prefix-icon="el-icon-search"
+            clearable
+            class="search-input"
+            @keyup.enter.native="load(1)"
+          />
+          <el-button 
+            type="primary" 
+            icon="el-icon-search"
+            @click="load(1)"
+          >查询</el-button>
+          <el-button 
+            type="warning" 
+            icon="el-icon-refresh"
+            @click="reset"
+          >重置</el-button>
+        </div>
+      </div>
+
+      <!-- 列表 -->
+      <el-table
+        :data="tableData"
+        stripe
+        style="width: 100%"
+        :header-cell-style="{background:'#f5f7fa'}"
+        size="mini"
+      >
+        <el-table-column prop="title" label="反馈主题" min-width="120">
+          <template #default="{ row }">
+            <el-tooltip :content="row.title" placement="top" :disabled="row.title.length < 15">
+              <span class="ellipsis">{{ row.title }}</span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="content" label="反馈内容" min-width="180">
+          <template #default="{ row }">
+            <el-tooltip :content="row.content" placement="top">
+              <span class="ellipsis">{{ row.content }}</span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="联系方式" width="240">
+          <template #default="{ row }">
+            <div class="contact-info">
+              <span class="contact-item">
+                <i class="el-icon-mobile-phone"></i>
+                {{ row.phone }}
+              </span>
+              <el-divider direction="vertical"></el-divider>
+              <span class="contact-item">
+                <i class="el-icon-message"></i>
+                {{ row.email }}
+              </span>
+            </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="reply" label="回复" min-width="150">
+          <template #default="{ row }">
+            <el-tooltip :content="row.reply" placement="top">
+              <span class="ellipsis" :class="{'no-reply': !row.reply}">
+                {{ row.reply || '暂无回复' }}
+              </span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="createtime" label="时间" width="160">
+          <template #default="{ row }">
+            <i class="el-icon-time"></i>
+            {{ row.createtime }}
+          </template>
+        </el-table-column>
+
+        <el-table-column label="操作" width="80" align="center">
+          <template #default="{ row }">
+            <el-button
+              type="danger"
+              size="mini"
+              icon="el-icon-delete"
+              circle
+              @click="del(row.id)"
+            ></el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页器 -->
+      <el-pagination
+        v-if="total"
+        class="pagination"
+        background
+        layout="total, prev, pager, next"
+        :current-page="pageNum"
+        :page-size="pageSize"
+        :total="total"
+        :page-sizes="[10, 20, 30]"
+        @current-change="handleCurrentChange"
       />
-      <el-button type="info" plain size="mini" @click="load(1)">查询</el-button>
-      <el-button type="warning" plain size="mini" @click="reset">重置</el-button>
-    </div>
-
-    <!-- ▍列表 -->
-    <el-table
-      :data="tableData"
-      stripe
-      border
-    >
-      <el-table-column prop="title" label="主题" />
-      <el-table-column prop="content" label="内容" />
-      <el-table-column prop="phone" label="联系方式" width="120" />
-      <el-table-column prop="email" label="邮箱" width="160" />
-      <el-table-column prop="reply" label="回复" />
-      <el-table-column prop="createtime" label="创建时间" width="160" />
-      <el-table-column label="操作" width="100" align="center">
-        <template #default="{ row }">
-          <el-button
-            type="danger"
-            size="mini"
-            plain
-            @click="del(row.id)"
-          >删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <!-- ▍分页 -->
-    <el-pagination
-      v-if="total"
-      class="pager"
-      background
-      layout="total, prev, pager, next"
-      :current-page="pageNum"
-      :page-size="pageSize"
-      :total="total"
-      :page-sizes="[10, 20, 30]"
-      @current-change="handleCurrentChange"
-    />
+    </el-card>
   </div>
 </template>
 
@@ -61,8 +124,7 @@ export default {
       pageNum: 1,
       pageSize: 10,
       total: 0,
-      keyword: this.$route.query.title || '', // 查询关键字
-      /* 以下保留原功能字段（新增/编辑）—— 兼容后端接口 */
+      keyword: this.$route.query.title || '',
       fromVisible: false,
       form: {},
       ids: [],
@@ -154,19 +216,100 @@ export default {
 
 <style scoped>
 .feedback-page {
-  width: 80%;
-  margin: 20px auto;
+  width: 95%;
+  margin: 15px auto;
 }
-.search-bar {
-  margin-bottom: 14px;
+
+.main-card {
+  border-radius: 4px;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 16px;
+  color: #303133;
   display: flex;
   align-items: center;
+  gap: 5px;
 }
+
+.page-title i {
+  color: #409EFF;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .search-input {
-  width: 200px;
+  width: 220px;
 }
-.pager {
-  margin-top: 16px;
-  text-align: center;
+
+/* 表格样式 */
+.ellipsis {
+  display: inline-block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contact-info {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.contact-item i {
+  color: #909399;
+  font-size: 14px;
+}
+
+.no-reply {
+  color: #909399;
+  font-style: italic;
+}
+
+/* 分页器 */
+.pagination {
+  margin-top: 15px;
+  text-align: right;
+}
+
+/* 响应式处理 */
+@media screen and (max-width: 768px) {
+  .feedback-page {
+    width: 100%;
+    margin: 10px auto;
+  }
+
+  .header-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .search-bar {
+    justify-content: space-between;
+  }
+
+  .search-input {
+    width: 50%;
+  }
 }
 </style>

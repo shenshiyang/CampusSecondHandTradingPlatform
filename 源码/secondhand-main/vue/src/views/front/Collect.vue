@@ -136,14 +136,123 @@ export default {
 
 <style scoped>
 .collect-page {
-  width: 70%;
-  margin: 20px auto;
+  width: 80%;
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 20px;
 }
+
+/* 批量操作按钮 */
 .mb10 {
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s;
 }
+
+.mb10:hover {
+  background: #ff7875;
+  border-color: #ff7875;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.2);
+}
+
+/* 卡片样式 */
+:deep(.el-card) {
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+  margin-bottom: 20px;
+}
+
+/* 表格样式 */
+:deep(.el-table) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:deep(.el-table th) {
+  background-color: #fafafa;
+  color: #333;
+  font-weight: 500;
+  padding: 12px 0;
+}
+
+:deep(.el-table td) {
+  padding: 12px 0;
+}
+
+:deep(.el-table--striped .el-table__body tr.el-table__row--striped td) {
+  background: #fafafa;
+}
+
+/* 商品图片样式 */
+:deep(.el-image) {
+  border-radius: 8px !important;
+  transition: all 0.3s;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+:deep(.el-image:hover) {
+  transform: scale(1.05);
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+}
+
+/* 商品链接样式 */
+.el-table a {
+  color: #1890ff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.el-table a:hover {
+  color: #40a9ff;
+  background: rgba(24, 144, 255, 0.1);
+}
+
+/* 操作按钮样式 */
+:deep(.el-button--mini) {
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+:deep(.el-button--mini:hover) {
+  transform: translateY(-1px);
+  background: #ff4d4f;
+  border-color: #ff4d4f;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(255, 77, 79, 0.2);
+}
+
+/* 分页样式 */
 .pager {
-  margin-top: 12px;
+  margin-top: 20px;
   text-align: center;
+  padding: 10px 0;
+}
+
+:deep(.el-pagination.is-background .el-pager li:not(.disabled).active) {
+  background-color: #1890ff;
+}
+
+:deep(.el-pagination.is-background .el-pager li:not(.disabled):hover) {
+  color: #1890ff;
+}
+
+/* 空状态样式 */
+:deep(.el-table__empty-block) {
+  padding: 40px 0;
+}
+
+:deep(.el-table__empty-text) {
+  color: #999;
+  font-size: 14px;
 }
 </style>

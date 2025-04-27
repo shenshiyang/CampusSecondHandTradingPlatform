@@ -91,4 +91,10 @@ public class HelpController {
         return Result.success(page);
     }
 
+    @PostMapping("/updateSolvedStatus")
+    public Result updateSolvedStatus(@RequestBody Help help) {
+        helpService.updateSolvedStatus(help);
+        return Result.success();
+    }
+
 }

@@ -96,4 +96,10 @@
         where id = #{id}
     </update>
 
+    <update id="updateSolvedStatus" parameterType="com.example.entity.Help">
+        update help
+        set solved = #{solved}
+        where id = #{id}
+    </update>
+
 </mapper>

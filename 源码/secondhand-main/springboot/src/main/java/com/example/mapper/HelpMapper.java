@@ -35,4 +35,9 @@ public interface HelpMapper {
 
     List<Help> selectFrontAll(Help help);
 
+    /**
+     * 仅更新解决状态
+     */
+    int updateSolvedStatus(Help help);
+
 }

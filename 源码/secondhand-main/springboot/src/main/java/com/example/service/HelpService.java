@@ -93,4 +93,11 @@ public class HelpService {
         return PageInfo.of(list);
     }
 
+    /**
+     * 仅更新解决状态（不影响审核状态）
+     */
+    public void updateSolvedStatus(Help help) {
+        helpMapper.updateSolvedStatus(help);
+    }
+
 }

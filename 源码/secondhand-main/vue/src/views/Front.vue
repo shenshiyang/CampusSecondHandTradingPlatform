@@ -22,7 +22,7 @@
       </div>
 
       <!-- 聊天消息 -->
-      <div class="front-header-chat" @click="goToChat">
+      <div class="front-header-chat" @click="handleChatClick">
         <i class="el-icon-chat-dot-round" style="margin-right: 4px"></i> 聊天消息
         <div v-if="totalUnreadCount > 0" class="unread-badge">{{ totalUnreadCount }}</div>
       </div>
@@ -38,7 +38,6 @@
             <div class="user-info">
               <div class="avatar-wrapper">
                 <img :src="user.avatar" class="avatar" alt="用户头像" />
-                <div v-if="totalUnreadCount > 0" class="unread-badge avatar-badge">{{ totalUnreadCount }}</div>
               </div>
               <span>{{ user.name }}</span>
               <i class="el-icon-arrow-down" style="margin-left: 4px"></i>
@@ -80,7 +79,9 @@ export default {
         { text: '留言反馈', path: '/front/feedback' },
       ],
       totalUnreadCount: 0,
-      ws: null
+      ws: null,
+      processedMessageIds: new Set(),
+      activeNotifications: new Set(),
     }
   },
   mounted() {
@@ -91,8 +92,64 @@ export default {
   },
   beforeDestroy() {
     this.closeWebSocket();
+    this.processedMessageIds.clear();
+    this.activeNotifications.clear();
   },
   methods: {
+    showNotification(data) {
+      const notificationId = `${data.fromUserId}-${data.timestamp}`;
+      
+      if (this.activeNotifications.has(notificationId)) {
+        console.log('通知已在显示中，跳过:', notificationId);
+        return;
+      }
+      
+      this.activeNotifications.add(notificationId);
+      
+      const h = this.$createElement;
+      const notification = this.$notify({
+        title: '新消息提醒',
+        message: h('div', { 
+          style: {
+            display: 'flex',
+            alignItems: 'center',
+            cursor: 'pointer'
+          },
+          on: {
+            click: () => {
+              this.$router.push({
+                path: '/front/chat',
+                query: { toUserId: data.fromUserId }
+              });
+              this.activeNotifications.delete(notificationId);
+              notification.close();
+            }
+          }
+        }, [
+          h('img', {
+            style: {
+              width: '30px',
+              height: '30px',
+              borderRadius: '50%',
+              marginRight: '8px'
+            },
+            attrs: {
+              src: data.fromUserAvatar
+            }
+          }),
+          h('div', [
+            h('div', { style: { fontWeight: 'bold' } }, data.fromUserName),
+            h('div', { style: { color: '#666' } }, data.content)
+          ])
+        ]),
+        type: 'success',
+        duration: 5000,
+        position: 'bottom-right',
+        onClose: () => {
+          this.activeNotifications.delete(notificationId);
+        }
+      });
+    },
     initWebSocket() {
       if (typeof WebSocket === 'undefined') {
         this.$message.error('您的浏览器不支持WebSocket');
@@ -100,76 +157,62 @@ export default {
       }
       this.closeWebSocket();
       
-      const wsUrl = `ws://${window.location.host}/chatServer/${this.user.id}`;
-      this.ws = new WebSocket(wsUrl);
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsPort = '9090';
+      const wsUrl = `${protocol}//${window.location.hostname}:${wsPort}/chatServer/${this.user.id}`;
       
-      this.ws.onopen = () => {
-        console.log('WebSocket连接成功');
-      };
+      console.log('正在连接WebSocket:', wsUrl);
       
-      this.ws.onmessage = (e) => {
-        try {
-          const data = JSON.parse(e.data);
-          if (data.type === 'chat' && data.toUserId === this.user.id) {
-            // 收到新消息，更新未读消息数
-            this.getUnreadCount();
-            
-            // 显示消息提醒
-            const h = this.$createElement;
-            this.$notify({
-              title: '新消息提醒',
-              message: h('div', { 
-                style: {
-                  display: 'flex',
-                  alignItems: 'center',
-                  cursor: 'pointer'
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({
-                      path: '/front/chat',
-                      query: { toUserId: data.fromUserId }
-                    });
-                  }
-                }
-              }, [
-                h('img', {
-                  style: {
-                    width: '30px',
-                    height: '30px',
-                    borderRadius: '50%',
-                    marginRight: '8px'
-                  },
-                  attrs: {
-                    src: data.fromUserAvatar
-                  }
-                }),
-                h('div', [
-                  h('div', { style: { fontWeight: 'bold' } }, data.fromUserName),
-                  h('div', { style: { color: '#666' } }, data.content)
-                ])
-              ]),
-              type: 'success',
-              duration: 5000,
-              position: 'bottom-right'
-            });
+      try {
+        this.ws = new WebSocket(wsUrl);
+        
+        this.ws.onopen = () => {
+          console.log('WebSocket连接成功');
+          this.getUnreadCount();
+        };
+        
+        this.ws.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data);
+            if (data.type === 'chat' && data.toUserId === this.user.id) {
+              const messageId = `${data.fromUserId}-${data.timestamp}`;
+              
+              if (this.processedMessageIds.has(messageId)) {
+                console.log('跳过重复消息:', messageId);
+                return;
+              }
+              
+              this.processedMessageIds.add(messageId);
+              
+              if (this.processedMessageIds.size > 100) {
+                const idsArray = Array.from(this.processedMessageIds);
+                this.processedMessageIds = new Set(idsArray.slice(-50));
+              }
+
+              this.getUnreadCount();
+              
+              this.showNotification(data);
+            }
+          } catch (error) {
+            console.error('解析WebSocket消息失败:', error);
           }
-        } catch (error) {
-          console.error('解析WebSocket消息失败:', error);
-        }
-      };
-      
-      this.ws.onclose = () => {
-        console.log('WebSocket连接关闭');
-        setTimeout(() => {
-          this.initWebSocket();
-        }, 3000);
-      };
-      
-      this.ws.onerror = () => {
-        console.error('WebSocket连接错误');
-        this.closeWebSocket();
-      };
+        };
+        
+        this.ws.onclose = () => {
+          console.log('WebSocket连接关闭');
+          setTimeout(() => {
+            this.initWebSocket();
+          }, 3000);
+        };
+        
+        this.ws.onerror = () => {
+          console.error('WebSocket连接错误');
+          this.closeWebSocket();
+        };
+      } catch (error) {
+        console.error('创建WebSocket连接失败:', error);
+        this.$message.error('连接聊天服务失败');
+      }
     },
     closeWebSocket() {
       if (this.ws) {
@@ -181,6 +224,7 @@ export default {
       this.$request.get('/chatGroup/selectUserGroup').then(res => {
         if (res.code === '200') {
           this.totalUnreadCount = res.data.reduce((total, chat) => total + (chat.chatNum || 0), 0);
+          console.log('更新未读消息总数:', this.totalUnreadCount);
         }
       });
     },
@@ -193,7 +237,8 @@ export default {
         this.closeWebSocket();
       }
     },
-    goToChat() {
+    handleChatClick() {
+      this.totalUnreadCount = 0;
       this.$router.push('/front/chat');
     },
     logout() {
