@@ -27,6 +27,11 @@
         <div v-if="totalUnreadCount > 0" class="unread-badge">{{ totalUnreadCount }}</div>
       </div>
 
+      <!-- AI客服 -->
+      <div class="front-header-ai" @click="handleAIClick">
+        <i class="el-icon-service" style="margin-right: 4px"></i> AI客服
+      </div>
+
       <!-- 右侧用户 -->
       <div class="front-header-right">
         <template v-if="!user.username">
@@ -62,6 +67,35 @@
     <div class="main-body">
       <router-view ref="child" @update:user="updateUser" />
     </div>
+
+    <!-- AI客服对话框 -->
+    <el-dialog
+      title="AI客服"
+      :visible.sync="aiDialogVisible"
+      width="500px"
+      :close-on-click-modal="false"
+      custom-class="ai-dialog"
+    >
+      <div class="ai-chat-container">
+        <div class="ai-chat-messages" ref="chatMessages">
+          <div v-for="(msg, index) in aiMessages" :key="index" :class="['message', msg.type]">
+            <div class="avatar">
+              <img :src="msg.type === 'user' ? user.avatar : 'https://api.dicebear.com/7.x/bottts/svg?seed=ai-assistant'" alt="avatar">
+            </div>
+            <div class="content">{{ msg.content }}</div>
+          </div>
+        </div>
+        <div class="ai-chat-input">
+          <el-input
+            v-model="aiInputMessage"
+            placeholder="请输入您的问题..."
+            @keyup.enter.native="sendAIMessage"
+          >
+            <el-button slot="append" icon="el-icon-position" @click="sendAIMessage"></el-button>
+          </el-input>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -82,6 +116,10 @@ export default {
       ws: null,
       processedMessageIds: new Set(),
       activeNotifications: new Set(),
+      // AI客服相关
+      aiDialogVisible: false,
+      aiInputMessage: '',
+      aiMessages: [],
     }
   },
   mounted() {
@@ -241,6 +279,55 @@ export default {
       this.totalUnreadCount = 0;
       this.$router.push('/front/chat');
     },
+    handleAIClick() {
+      this.aiDialogVisible = true;
+      if (this.aiMessages.length === 0) {
+        this.aiMessages.push({
+          type: 'ai',
+          content: '您好！我是前湖集市的AI客服，有什么可以帮您的吗？'
+        });
+      }
+    },
+    sendAIMessage() {
+      if (!this.aiInputMessage.trim()) return;
+      
+      // 添加用户消息
+      this.aiMessages.push({
+        type: 'user',
+        content: this.aiInputMessage
+      });
+      
+      const userMessage = this.aiInputMessage;
+      this.aiInputMessage = '';
+      
+      // 滚动到底部
+      this.$nextTick(() => {
+        this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight;
+      });
+      
+      // 发送请求
+      this.$request.post('/aiChat/chat', {
+        message: userMessage,
+        mode: 'chat',
+        userId: this.user.id || 1
+      }).then(res => {
+        if (res.code === '200') {
+          this.aiMessages.push({
+            type: 'ai',
+            content: res.data.response
+          });
+          // 滚动到底部
+          this.$nextTick(() => {
+            this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight;
+          });
+        } else {
+          this.$message.error('获取AI回复失败');
+        }
+      }).catch(err => {
+        console.error(err);
+        this.$message.error('获取AI回复失败');
+      });
+    },
     logout() {
       localStorage.removeItem("xm-user")
       this.$router.push("/login")
@@ -384,6 +471,30 @@ export default {
   font-size: 18px;
 }
 
+.front-header-ai {
+  font-size: 15px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.85);
+  margin-right: 25px;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 20px;
+  transition: all 0.3s;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.front-header-ai:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.front-header-ai i {
+  margin-right: 6px;
+  font-size: 18px;
+}
+
 .front-header-right {
   display: flex;
   align-items: center;
@@ -522,5 +633,73 @@ export default {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+.ai-chat-container {
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: #f5f7fa;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.message {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.message.user {
+  flex-direction: row-reverse;
+}
+
+.message .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 10px;
+}
+
+.message .avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.message .content {
+  max-width: 70%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.message.user .content {
+  background: #e6f7ff;
+}
+
+.ai-chat-input {
+  padding: 0 20px;
+}
+
+:deep(.ai-dialog .el-dialog__body) {
+  padding: 20px;
+}
+
+:deep(.ai-dialog .el-dialog__header) {
+  padding: 20px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+:deep(.ai-dialog .el-dialog__title) {
+  font-size: 18px;
+  font-weight: 600;
 }
 </style>

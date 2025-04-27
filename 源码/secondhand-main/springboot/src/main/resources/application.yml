@@ -43,3 +43,8 @@ alipay:
 
   notifyUrl:  http://gzg4in.natappfree.cc/alipay/notify
 
+ai:
+  service:
+    url: http://localhost:3001/api/v1/workspace/secondhand/thread/bf4fb8b2-1092-4ab7-bfec-4d6cb6b90444/chat
+    api-key: BRVXKS1-BWK4DTV-G7XASAP-X5D9FGR
+

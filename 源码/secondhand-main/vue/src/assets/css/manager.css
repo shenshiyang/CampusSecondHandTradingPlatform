@@ -1,6 +1,6 @@
 /* ========= 页面基础结构 ========= */
 .manager-container {
-  background-color: #f5f7fa;
+  background-color: #f0f2f5;
   min-height: 100vh;
   font-family: "Helvetica Neue", Arial, sans-serif;
 }
@@ -9,28 +9,34 @@
 .manager-header {
   display: flex;
   align-items: center;
-  height: 60px;
-  background-color: #80c0f1;
-  padding: 0 20px;
+  height: 64px;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  padding: 0 24px;
   color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
 }
 
 .manager-header-left {
   display: flex;
   align-items: center;
-  width: 220px;
+  width: 240px;
 }
 
 .manager-header-left img {
-  width: 36px;
-  height: 36px;
-  margin-right: 8px;
+  width: 40px;
+  height: 40px;
+  margin-right: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .manager-header-left .title {
-  font-size: 18px;
-  font-weight: bold;
-  color: #eee;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 1px;
 }
 
 .manager-header-center {
@@ -38,11 +44,11 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding-left: 20px;
+  padding-left: 24px;
 }
 
 .manager-header-right {
-  width: 220px;
+  width: 240px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -51,36 +57,44 @@
 .manager-header-right .avatar {
   display: flex;
   align-items: center;
-  color: #ccc;
+  color: #fff;
   cursor: pointer;
-  padding-right: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.manager-header-right .avatar:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .manager-header-right .avatar img {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 8px;
+  margin-right: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 /* ========= 主体区域布局 ========= */
 .manager-main {
   display: flex;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 64px);
 }
 
 .manager-main-left {
-  width: 220px;
+  width: 240px;
   background-color: #fff;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }
 
 .manager-main-right {
   flex: 1;
-  padding: 16px;
+  padding: 20px;
   overflow-y: auto;
-  background-color: #f5f7fa;
+  background-color: #f0f2f5;
 }
 
 /* ========= 卡片模块 ========= */
@@ -89,15 +103,15 @@
 .manager-main-right .operation,
 .manager-main-right .table {
   background-color: #fff;
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  margin-bottom: 16px;
-  transition: all 0.3s ease-in-out;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
 }
 
 .manager-main-right .table .pagination {
-  margin-top: 12px;
+  margin-top: 16px;
   text-align: right;
 }
 
@@ -105,15 +119,17 @@
 .el-menu {
   width: 100%;
   border-right: none;
+  padding: 8px 0;
 }
 
 .el-menu-item,
 .el-submenu__title {
-  height: 50px;
-  line-height: 50px;
+  height: 48px;
+  line-height: 48px;
   font-size: 14px;
-  color: #444;
-  transition: all 0.2s;
+  color: #333;
+  transition: all 0.3s ease;
+  margin: 4px 0;
 }
 
 .el-menu-item:hover,
@@ -125,11 +141,12 @@
 .el-menu-item.is-active {
   background-color: #e6f7ff !important;
   color: #1890ff !important;
-  font-weight: bold;
+  font-weight: 600;
+  border-right: 3px solid #1890ff;
 }
 
 .el-menu--inline .el-menu-item {
-  padding-left: 40px !important;
+  padding-left: 48px !important;
 }
 
 .el-submenu__icon-arrow {
@@ -138,36 +155,65 @@
 
 /* ========= 面包屑样式 ========= */
 .el-breadcrumb {
-  margin-left: 10px;
+  margin-left: 12px;
 }
 
 .el-breadcrumb__inner {
-  color: #666 !important;
-  font-size: 13px;
+  color: #fff !important;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* ========= 表格表头 ========= */
 th.el-table__cell {
   background-color: #fafafa !important;
-  color: #555;
-  font-weight: bold;
+  color: #333;
+  font-weight: 600;
 }
 
 /* ========= 下拉菜单间距 ========= */
 .el-dropdown-menu {
-  margin-top: 12px !important;
+  margin-top: 8px !important;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 8px 0;
 }
 
-/* ========= 补充优化：滚动条美化（可选） ========= */
+.el-dropdown-menu__item {
+  padding: 8px 20px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.el-dropdown-menu__item:hover {
+  background-color: #f0f7ff;
+  color: #1890ff;
+}
+
+/* ========= 滚动条美化 ========= */
 .manager-main-right::-webkit-scrollbar {
   width: 6px;
 }
 
 .manager-main-right::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 0, 0.2);
   border-radius: 3px;
 }
 
 .manager-main-right::-webkit-scrollbar-track {
   background-color: transparent;
+}
+
+/* ========= 图标样式 ========= */
+.el-menu-item i,
+.el-submenu__title i {
+  font-size: 18px;
+  margin-right: 8px;
+  color: #666;
+}
+
+.el-menu-item:hover i,
+.el-submenu__title:hover i,
+.el-menu-item.is-active i {
+  color: #1890ff;
 }
