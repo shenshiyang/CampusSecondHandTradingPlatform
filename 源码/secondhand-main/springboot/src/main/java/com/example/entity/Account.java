@@ -20,6 +20,9 @@ public class Account {
 
     private String token;
 
+    private String captcha;
+    private String captchaUuid;
+
     public Integer getId() {
         return id;
     }
@@ -82,5 +85,21 @@ public class Account {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getCaptcha() {
+        return captcha;
+    }
+
+    public void setCaptcha(String captcha) {
+        this.captcha = captcha;
+    }
+
+    public String getCaptchaUuid() {
+        return captchaUuid;
+    }
+
+    public void setCaptchaUuid(String captchaUuid) {
+        this.captchaUuid = captchaUuid;
     }
 }

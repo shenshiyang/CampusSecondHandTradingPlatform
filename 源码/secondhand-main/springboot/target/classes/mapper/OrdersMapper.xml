@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.OrdersMapper">
+
+    <sql id="Base_Column_List">
+        id,goods_name,goods_img,order_no,total,time,pay_no,pay_time,user_id,address,phone,user_name,status,sale_id
+    </sql>
+
+    <select id="selectAll" resultType="com.example.entity.Orders">
+        select
+        orders.*, u1.name as user, u2.name as saleName
+        from orders
+        left join user u1 on orders.user_id = u1.id
+        left join user u2 on orders.sale_id = u2.id
+        <where>
+            <if test="goodsName != null"> and orders.goods_name like concat('%', #{goodsName}, '%')</if>
+            <if test="orderNo != null"> and orders.order_no like concat('%', #{orderNo}, '%')</if>
+            <if test="payNo != null"> and orders.pay_no like concat('%', #{payNo}, '%')</if>
+            <if test="userId != null"> and orders.user_id = #{userId}</if>
+            <if test="status != null"> and orders.status like concat('%', #{status}, '%')</if>
+            <if test="saleId != null"> and orders.sale_id = #{saleId}</if>
+        </where>
+        order by orders.id desc
+    </select>
+
+    <select id="selectById" resultType="com.example.entity.Orders">
+        select id, goods_id, goods_name, goods_img, order_no, total, time, pay_no, pay_time, user_id, address, phone, user_name, status, sale_id
+        from orders
+        where id = #{id}
+    </select>
+
+
+    <delete id="deleteById">
+        delete from orders
+        where  id = #{id}
+    </delete>
+
+    <insert id="insert" parameterType="com.example.entity.Orders" useGeneratedKeys="true" keyProperty="id">
+        insert into orders
+        (goods_id, goods_name, goods_img, order_no, total, time, pay_no, pay_time, user_id, address, phone, user_name, status, sale_id)
+        values
+            (#{goodsId}, #{goodsName}, #{goodsImg}, #{orderNo}, #{total}, #{time}, #{payNo}, #{payTime}, #{userId}, #{address}, #{phone}, #{userName}, #{status}, #{saleId})
+    </insert>
+
+
+    <update id="updateById" parameterType="com.example.entity.Orders">
+        update orders
+        <set>
+            <if test="goodsName != null">
+                goods_name = #{goodsName},
+            </if>
+            <if test="goodsImg != null">
+                goods_img = #{goodsImg},
+            </if>
+            <if test="orderNo != null">
+                order_no = #{orderNo},
+            </if>
+            <if test="total != null">
+                total = #{total},
+            </if>
+            <if test="time != null">
+                time = #{time},
+            </if>
+            <if test="payNo != null">
+                pay_no = #{payNo},
+            </if>
+            <if test="payTime != null">
+                pay_time = #{payTime},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId},
+            </if>
+            <if test="address != null">
+                address = #{address},
+            </if>
+            <if test="phone != null">
+                phone = #{phone},
+            </if>
+            <if test="userName != null">
+                user_name = #{userName},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="saleId != null">
+                sale_id = #{saleId},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="updateByOrderNo" parameterType="com.example.entity.Orders">
+        update orders
+        set status = #{status},
+            pay_no = #{payNo},
+            pay_time = #{payTime}
+        where order_no = #{orderNo}
+    </update>
+
+    <select id="selectCategorySalesCount" resultType="cn.hutool.core.lang.Dict">
+        SELECT g.category AS name, COUNT(*) AS value
+        FROM orders o
+            LEFT JOIN goods g ON o.goods_id = g.id
+        WHERE o.status = '已完成'
+        GROUP BY g.category
+    </select>
+
+
+</mapper>

@@ -8,6 +8,7 @@ import com.example.entity.Admin;
 import com.example.entity.User;
 import com.example.exception.CustomException;
 import com.example.mapper.UserMapper;
+import com.example.utils.PasswordUtil;
 import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -101,7 +102,8 @@ public class UserService {
         if (ObjectUtil.isNull(dbUser)) {
             throw new CustomException(ResultCodeEnum.USER_NOT_EXIST_ERROR);
         }
-        if (!account.getPassword().equals(dbUser.getPassword())) {
+        // BCrypt密码校验
+        if (!PasswordUtil.matches(account.getPassword(), dbUser.getPassword())) {
             throw new CustomException(ResultCodeEnum.USER_ACCOUNT_ERROR);
         }
         // 生成token
@@ -117,7 +119,8 @@ public class UserService {
     public void register(Account account) {
         User user = new User();
         user.setUsername(account.getUsername());
-        user.setPassword(account.getPassword());
+        // 注册时加密密码
+        user.setPassword(PasswordUtil.encode(account.getPassword()));
         this.add(user);
     }
 
@@ -126,10 +129,11 @@ public class UserService {
         if (ObjectUtil.isNull(dbUser)) {
             throw new CustomException(ResultCodeEnum.USER_NOT_EXIST_ERROR);
         }
-        if (!account.getPassword().equals(dbUser.getPassword())) {
+        // BCrypt密码校验
+        if (!PasswordUtil.matches(account.getPassword(), dbUser.getPassword())) {
             throw new CustomException(ResultCodeEnum.PARAM_PASSWORD_ERROR);
         }
-        dbUser.setPassword(account.getNewPassword());
+        dbUser.setPassword(PasswordUtil.encode(account.getNewPassword()));
         userMapper.updateById(dbUser);
     }
 

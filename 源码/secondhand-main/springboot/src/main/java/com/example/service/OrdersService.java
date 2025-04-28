@@ -75,7 +75,7 @@ public class OrdersService {
         orders.setGoodsId(latestGoods.getId());
 
         Address address = addressService.selectById(orders.getAddressId());
-        orders.setUserName(address.getUserName());
+        orders.setUserName(address.getName());
         orders.setAddress(address.getAddress());
         orders.setPhone(address.getPhone());
 

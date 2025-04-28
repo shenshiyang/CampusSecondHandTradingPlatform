@@ -36,11 +36,22 @@
           </template>
         </el-table-column>
 
+        <!-- 审核状态列 -->
+        <el-table-column prop="status" label="审核状态" width="100" align="center">
+          <template v-slot="scope">
+            <el-tag
+              :type="scope.row.status === '通过' ? 'success' : (scope.row.status === '拒绝' ? 'danger' : 'info')"
+            >
+              {{ scope.row.status }}
+            </el-tag>
+          </template>
+        </el-table-column>
+
         <!-- 浏览量列 -->
         <el-table-column prop="readCount" label="浏览量" width="100" align="center" />
 
         <!-- 操作列 -->
-        <el-table-column label="操作" align="center">
+        <el-table-column label="操作" align="center" width="220">
           <template v-slot="scope">
             <div class="btn-group">
               <el-tooltip content="编辑商品" placement="top">
@@ -193,6 +204,7 @@ export default {
 .goods-container {
   width: 90%;
   max-width: 1400px;
+  min-width: 1200px;
   margin: 30px auto;
   padding: 0 20px;
 }
@@ -203,6 +215,7 @@ export default {
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
   background: #fff;
+  overflow-x: auto;
 }
 
 /* Table Styling */

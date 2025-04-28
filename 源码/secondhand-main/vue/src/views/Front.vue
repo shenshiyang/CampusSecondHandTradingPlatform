@@ -107,7 +107,7 @@ export default {
       user: JSON.parse(localStorage.getItem("xm-user") || '{}'),
       menus: [
         { text: '热卖专区', path: '/front/home' },
-        { text: '社区广场', path: '/front/posts' },
+        { text: '校园广场', path: '/front/posts' },
         { text: '求助专区', path: '/front/help' },
         { text: '系统公告', path: '/front/notice' },
         { text: '留言反馈', path: '/front/feedback' },

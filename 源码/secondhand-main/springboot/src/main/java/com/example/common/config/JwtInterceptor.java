@@ -42,6 +42,11 @@ public class JwtInterceptor implements HandlerInterceptor {
         System.out.println("【拦截器】当前请求路径：" + uri);
         System.out.println("获取到的 token = " + token);
 
+        // 放行验证码接口
+        if (uri.contains("/api/captcha")) {
+            return true;
+        }
+
         if (ObjectUtil.isEmpty(token)) {
             // 如果没拿到，从参数里再拿一次
             token = request.getParameter(Constants.TOKEN);

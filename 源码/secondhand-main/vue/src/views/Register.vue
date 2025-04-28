@@ -23,6 +23,10 @@
             <el-form-item prop="confirmPassword">
               <el-input size="medium" prefix-icon="el-icon-lock" placeholder="请确认密码" show-password  v-model="form.confirmPassword"></el-input>
             </el-form-item>
+            <el-form-item prop="captcha">
+              <el-input size="medium" placeholder="请输入验证码" v-model="form.captcha" style="width: 180px; display: inline-block; margin-right: 10px;"></el-input>
+              <img :src="captchaImg" @click="getCaptcha" style="height: 40px; vertical-align: middle; cursor: pointer;" title="点击刷新验证码"/>
+            </el-form-item>
             <el-form-item>
               <el-button size="medium" class="register-btn" @click="login">注 册</el-button>
             </el-form-item>
@@ -48,34 +52,51 @@ export default {
       }
     }
     return {
-      form: { role: 'USER' },
+      captchaImg: '',
+      captchaUuid: '',
+      form: { role: 'USER', captcha: '' },
       rules: {
         username: [
           { required: true, message: '请输入账号', trigger: 'blur' },
         ],
         password: [
           { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
         ],
         confirmPassword: [
           { validator: validatePassword, trigger: 'blur' }
+        ],
+        captcha: [
+          { required: true, message: '请输入验证码', trigger: 'blur' }
         ]
       }
     }
   },
   created() {
-
+    this.getCaptcha();
   },
   methods: {
+    getCaptcha() {
+      this.$request.get('/api/captcha').then(res => {
+        if (res.code === '200') {
+          this.captchaImg = res.data.img;
+          this.captchaUuid = res.data.uuid;
+        }
+      })
+    },
     login() {
       this.$refs['formRef'].validate((valid) => {
         if (valid) {
-          // 验证通过
-          this.$request.post('/register', this.form).then(res => {
+          this.$request.post('/register', {
+            ...this.form,
+            captchaUuid: this.captchaUuid
+          }).then(res => {
             if (res.code === '200') {
               this.$router.push('/login')
               this.$message.success('注册成功')
             } else {
               this.$message.error(res.msg)
+              this.getCaptcha();
             }
           })
         }

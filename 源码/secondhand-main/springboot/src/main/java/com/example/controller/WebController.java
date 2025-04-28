@@ -11,6 +11,7 @@ import com.example.exception.CustomException;
 import com.example.service.AdminService;
 import com.example.service.LoginLogService;
 import com.example.service.UserService;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -28,6 +29,8 @@ public class WebController {
     UserService userService;
     @Resource
     private LoginLogService loginLogService;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @GetMapping("/")
     public Result hello() {
@@ -39,6 +42,14 @@ public class WebController {
      */
     @PostMapping("/login")
     public Result login(@RequestBody Account account) {
+        // 验证码校验
+        String captcha = account.getCaptcha();
+        String captchaUuid = account.getCaptchaUuid();
+        String redisCode = stringRedisTemplate.opsForValue().get("captcha:" + captchaUuid);
+        if (redisCode == null || !redisCode.equalsIgnoreCase(captcha)) {
+            return Result.error("400", "验证码错误或已过期");
+        }
+        stringRedisTemplate.delete("captcha:" + captchaUuid);
         if (ObjectUtil.isEmpty(account.getUsername()) || ObjectUtil.isEmpty(account.getPassword())
                 || ObjectUtil.isEmpty(account.getRole())) {
             return Result.error(ResultCodeEnum.PARAM_LOST_ERROR);
@@ -64,9 +75,17 @@ public class WebController {
      */
     @PostMapping("/register")
     public Result register(@RequestBody Account account) {
+        // 验证码校验
+        String captcha = account.getCaptcha();
+        String captchaUuid = account.getCaptchaUuid();
+        String redisCode = stringRedisTemplate.opsForValue().get("captcha:" + captchaUuid);
+        if (redisCode == null || !redisCode.equalsIgnoreCase(captcha)) {
+            return Result.error("400", "验证码错误或已过期");
+        }
+        stringRedisTemplate.delete("captcha:" + captchaUuid);
         if (StrUtil.isBlank(account.getUsername()) || StrUtil.isBlank(account.getPassword())
-                || ObjectUtil.isEmpty(account.getRole())) {
-            return Result.error(ResultCodeEnum.PARAM_LOST_ERROR);
+                || ObjectUtil.isEmpty(account.getRole()) || account.getPassword().length() < 6) {
+            return Result.error("400", "密码长度不能少于6位");
         }
         if (RoleEnum.USER.name().equals(account.getRole())) {
             userService.register(account);

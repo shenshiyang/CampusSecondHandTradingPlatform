@@ -156,7 +156,17 @@ export default {
       id: this.$route.query.id,
       user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
       categoryList: [],
-      form: { saleStatus: '下架', stock: 1 },
+      form: {
+        id: null,
+        name: '',
+        price: null,
+        category: '',
+        stock: 1,
+        address: '',
+        saleStatus: '下架',
+        img: '',
+        content: ''
+      },
       rules: {
         name: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
         price: [{ required: true, validator: validatePrice, trigger: 'blur' }],
@@ -185,7 +195,7 @@ export default {
     async loadGoods() {
       if (!this.id) return
       const { data } = await this.$request.get('/goods/selectById/' + this.id)
-      if (data) Object.assign(this.form, data)
+      if (data) this.form = { ...this.form, ...data }
     },
     /* 富文本初始化 */
     initEditor(html) {
