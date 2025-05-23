@@ -20,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -234,16 +237,31 @@ public class OrdersService {
                 .count();
     }
 
-    public List<Dict> selectLineWithCount() {
+    public List<Dict> selectLineWithCount(String startDate, String endDate) {
         List<Orders> ordersList = ordersMapper.selectAll(null).stream()
                 .filter(o -> OrderStatusEnum.DONE.value.equals(o.getStatus()))
+                .filter(o -> {
+                    if (o.getTime() == null) return false;
+                    String date = o.getTime().substring(0, 10);
+                    return (startDate == null || date.compareTo(startDate) >= 0)
+                        && (endDate == null || date.compareTo(endDate) <= 0);
+                })
                 .collect(Collectors.toList());
 
-        Date date = new Date();
-        DateTime start = DateUtil.offsetDay(date, -8);
-        DateTime end = DateUtil.offsetDay(date, -1);
-        List<DateTime> dateTimes = DateUtil.rangeToList(start, end, DateField.DAY_OF_YEAR);
-        List<String> dateList = dateTimes.stream().map(DateUtil::formatDate).collect(Collectors.toList());
+        // 生成区间内所有日期
+        List<String> dateList = new ArrayList<>();
+        if (startDate != null && endDate != null) {
+            DateTime start = DateUtil.parseDate(startDate);
+            DateTime end = DateUtil.parseDate(endDate);
+            List<DateTime> dateTimes = DateUtil.rangeToList(start, end, DateField.DAY_OF_YEAR);
+            dateList = dateTimes.stream().map(DateUtil::formatDate).collect(Collectors.toList());
+        } else {
+            Date date = new Date();
+            DateTime start = DateUtil.offsetDay(date, -8);
+            DateTime end = DateUtil.offsetDay(date, -1);
+            List<DateTime> dateTimes = DateUtil.rangeToList(start, end, DateField.DAY_OF_YEAR);
+            dateList = dateTimes.stream().map(DateUtil::formatDate).collect(Collectors.toList());
+        }
 
         List<Dict> dictList = new ArrayList<>();
         for (String day : dateList) {
@@ -255,14 +273,210 @@ public class OrdersService {
             long count = ordersList.stream()
                     .filter(o -> o.getTime() != null && o.getTime().contains(day))
                     .count();
-
-            dictList.add(Dict.create()
-                    .set("name", day)
-                    .set("sales", total)
-                    .set("count", count));
+            dictList.add(Dict.create().set("name", day).set("sales", total).set("count", count));
         }
-
         return dictList;
+    }
+
+    public List<Dict> selectBar(String startDate, String endDate) {
+        List<Orders> ordersList = ordersMapper.selectAll(null).stream()
+                .filter(orders -> OrderStatusEnum.DONE.value.equals(orders.getStatus()))
+                .filter(o -> {
+                    if (o.getTime() == null) return false;
+                    String date = o.getTime().substring(0, 10);
+                    return (startDate == null || date.compareTo(startDate) >= 0)
+                        && (endDate == null || date.compareTo(endDate) <= 0);
+                })
+                .collect(Collectors.toList());
+        Set<String> saleList = ordersList.stream().map(Orders::getSaleName).collect(Collectors.toSet());
+        List<Dict> dictList = new ArrayList<>();
+        for (String sale : saleList) {
+            BigDecimal total = ordersList.stream()
+                    .filter(orders -> sale.equals(orders.getSaleName()))
+                    .map(Orders::getTotal)
+                    .reduce(BigDecimal::add)
+                    .orElse(BigDecimal.ZERO);
+            dictList.add(Dict.create().set("name", sale).set("value", total));
+        }
+        return dictList;
+    }
+
+    public List<Dict> selectCategorySalesCount(String startDate, String endDate) {
+        // 如果需要时间区间，可以扩展Mapper SQL，这里直接调用SQL，统计商品种类销量
+        return ordersMapper.selectCategorySalesCount();
+    }
+
+    public BigDecimal getPeriodSalesTotal(String dateType) {
+        String[] range = getDateRangeByType(dateType);
+        List<Orders> ordersList = ordersMapper.selectAll(null).stream()
+                .filter(o -> OrderStatusEnum.DONE.value.equals(o.getStatus()))
+                .filter(o -> o.getTime() != null && o.getTime().length() >= 10 && o.getTime().substring(0, 10).compareTo(range[0]) >= 0 && o.getTime().substring(0, 10).compareTo(range[1]) <= 0)
+                .collect(Collectors.toList());
+        return ordersList.stream().map(Orders::getTotal).reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
+    }
+
+    public Integer getPeriodOrderCount(String dateType) {
+        String[] range = getDateRangeByType(dateType);
+        return (int) ordersMapper.selectAll(null).stream()
+                .filter(o -> OrderStatusEnum.DONE.value.equals(o.getStatus()))
+                .filter(o -> o.getTime() != null && o.getTime().length() >= 10 && o.getTime().substring(0, 10).compareTo(range[0]) >= 0 && o.getTime().substring(0, 10).compareTo(range[1]) <= 0)
+                .count();
+    }
+
+    private String[] getDateRangeByType(String dateType) {
+        LocalDate now = LocalDate.now();
+        String start, end;
+        if ("day".equals(dateType)) {
+            start = now.toString();
+            end = now.toString();
+        } else if ("month".equals(dateType)) {
+            start = now.withDayOfMonth(1).toString();
+            end = now.withDayOfMonth(now.lengthOfMonth()).toString();
+        } else if ("year".equals(dateType)) {
+            start = now.withDayOfYear(1).toString();
+            end = now.withDayOfYear(now.lengthOfYear()).toString();
+        } else { // 默认周
+            start = now.with(DayOfWeek.MONDAY).toString();
+            end = now.with(DayOfWeek.SUNDAY).toString();
+        }
+        return new String[]{start, end};
+    }
+
+    public List<Dict> selectBarByType(String dateType) {
+        if ("month".equals(dateType)) {
+            String[] range = getDateRangeByType("month");
+            return selectBar(range[0], range[1]);
+        }
+        if ("year".equals(dateType)) {
+            List<Orders> ordersList = ordersMapper.selectAll(null).stream()
+                .filter(o -> OrderStatusEnum.DONE.value.equals(o.getStatus()))
+                .collect(Collectors.toList());
+            int currentYear = LocalDate.now().getYear();
+            List<Dict> dictList = new ArrayList<>();
+            for (int i = 4; i >= 0; i--) {
+                int year = currentYear - i;
+                String yearStr = String.valueOf(year);
+                Map<String, BigDecimal> saleMap = new HashMap<>();
+                for (Orders o : ordersList) {
+                    if (o.getTime() != null && o.getTime().startsWith(yearStr)) {
+                        String sale = o.getSaleName();
+                        saleMap.put(sale, saleMap.getOrDefault(sale, BigDecimal.ZERO).add(o.getTotal()));
+                    }
+                }
+                for (Map.Entry<String, BigDecimal> entry : saleMap.entrySet()) {
+                    dictList.add(Dict.create().set("name", entry.getKey() + " (" + yearStr + ")").set("value", entry.getValue()));
+                }
+            }
+            return dictList;
+        }
+        String[] range = getDateRangeByType(dateType);
+        return selectBar(range[0], range[1]);
+    }
+    public List<Dict> selectCategorySalesCountByType(String dateType) {
+        if ("month".equals(dateType)) {
+            String[] range = getDateRangeByType("month");
+            return ordersMapper.selectCategorySalesCountByRange(range[0], range[1]);
+        }
+        if ("year".equals(dateType)) {
+            List<Orders> ordersList = ordersMapper.selectAll(null).stream()
+                .filter(o -> OrderStatusEnum.DONE.value.equals(o.getStatus()))
+                .collect(Collectors.toList());
+            int currentYear = LocalDate.now().getYear();
+            Map<String, Long> categoryMap = new LinkedHashMap<>();
+            for (int i = 4; i >= 0; i--) {
+                int year = currentYear - i;
+                String yearStr = String.valueOf(year);
+                Map<String, Long> yearCategory = new HashMap<>();
+                for (Orders o : ordersList) {
+                    if (o.getTime() != null && o.getTime().startsWith(yearStr)) {
+                        String category = o.getCategory();
+                        yearCategory.put(category, yearCategory.getOrDefault(category, 0L) + 1);
+                    }
+                }
+                for (Map.Entry<String, Long> entry : yearCategory.entrySet()) {
+                    String key = entry.getKey() + " (" + yearStr + ")";
+                    categoryMap.put(key, entry.getValue());
+                }
+            }
+            List<Dict> result = new ArrayList<>();
+            for (Map.Entry<String, Long> entry : categoryMap.entrySet()) {
+                result.add(Dict.create().set("name", entry.getKey()).set("value", entry.getValue()));
+            }
+            return result;
+        }
+        String[] range = getDateRangeByType(dateType);
+        return ordersMapper.selectCategorySalesCountByRange(range[0], range[1]);
+    }
+    public List<Dict> selectLineWithCountByType(String dateType) {
+        if ("month".equals(dateType)) {
+            List<Dict> dictList = new ArrayList<>();
+            List<Orders> ordersList = ordersMapper.selectAll(null).stream()
+                .filter(o -> OrderStatusEnum.DONE.value.equals(o.getStatus()))
+                .collect(Collectors.toList());
+            LocalDate now = LocalDate.now();
+            DateTimeFormatter ymFmt = DateTimeFormatter.ofPattern("yyyy-MM");
+            for (int i = 11; i >= 0; i--) {
+                LocalDate month = now.minusMonths(i);
+                String ym = month.format(ymFmt);
+                BigDecimal total = ordersList.stream()
+                    .filter(o -> o.getTime() != null && o.getTime().startsWith(ym))
+                    .map(Orders::getTotal)
+                    .reduce(BigDecimal::add)
+                    .orElse(BigDecimal.ZERO);
+                long count = ordersList.stream()
+                    .filter(o -> o.getTime() != null && o.getTime().startsWith(ym))
+                    .count();
+                dictList.add(Dict.create().set("name", ym).set("sales", total).set("count", count));
+            }
+            return dictList;
+        }
+        if ("year".equals(dateType)) {
+            List<Dict> dictList = new ArrayList<>();
+            List<Orders> ordersList = ordersMapper.selectAll(null).stream()
+                .filter(o -> OrderStatusEnum.DONE.value.equals(o.getStatus()))
+                .collect(Collectors.toList());
+            int currentYear = LocalDate.now().getYear();
+            for (int i = 4; i >= 0; i--) {
+                int year = currentYear - i;
+                String yearStr = String.valueOf(year);
+                BigDecimal total = ordersList.stream()
+                    .filter(o -> o.getTime() != null && o.getTime().startsWith(yearStr))
+                    .map(Orders::getTotal)
+                    .reduce(BigDecimal::add)
+                    .orElse(BigDecimal.ZERO);
+                long count = ordersList.stream()
+                    .filter(o -> o.getTime() != null && o.getTime().startsWith(yearStr))
+                    .count();
+                dictList.add(Dict.create().set("name", yearStr).set("sales", total).set("count", count));
+            }
+            return dictList;
+        }
+        if ("week".equals(dateType)) {
+            // 近七天（不含今天）
+            List<Dict> dictList = new ArrayList<>();
+            List<Orders> ordersList = ordersMapper.selectAll(null).stream()
+                .filter(o -> OrderStatusEnum.DONE.value.equals(o.getStatus()))
+                .collect(Collectors.toList());
+            List<String> dateList = new ArrayList<>();
+            LocalDate now = LocalDate.now();
+            for (int i = 7; i >= 1; i--) {
+                dateList.add(now.minusDays(i).toString());
+            }
+            for (String day : dateList) {
+                BigDecimal total = ordersList.stream()
+                    .filter(o -> o.getTime() != null && o.getTime().startsWith(day))
+                    .map(Orders::getTotal)
+                    .reduce(BigDecimal::add)
+                    .orElse(BigDecimal.ZERO);
+                long count = ordersList.stream()
+                    .filter(o -> o.getTime() != null && o.getTime().startsWith(day))
+                    .count();
+                dictList.add(Dict.create().set("name", day).set("sales", total).set("count", count));
+            }
+            return dictList;
+        }
+        String[] range = getDateRangeByType(dateType);
+        return selectLineWithCount(range[0], range[1]);
     }
 
 }

@@ -109,30 +109,30 @@ public class OrdersController {
      * 查询柱状图数据
      */
     @GetMapping("/selectBar")
-    public Result selectBar() {
-        List<Dict> dictList = ordersService.selectBar();
+    public Result selectBar(@RequestParam(required = false) String dateType) {
+        List<Dict> dictList = ordersService.selectBarByType(dateType);
         return Result.success(dictList);
     }
 
     @GetMapping("/selectCategorySalesCount")
-    public Result selectCategorySalesCount() {
-        List<Dict> list = ordersService.selectCategorySalesCount();
+    public Result selectCategorySalesCount(@RequestParam(required = false) String dateType) {
+        List<Dict> list = ordersService.selectCategorySalesCountByType(dateType);
         return Result.success(list);
     }
 
     @GetMapping("/todayTotal")
-    public Result todayTotal() {
-        return Result.success(ordersService.getTodaySalesTotal());
+    public Result todayTotal(@RequestParam(required = false) String dateType) {
+        return Result.success(ordersService.getPeriodSalesTotal(dateType));
     }
 
     @GetMapping("/todayCount")
-    public Result todayCount() {
-        return Result.success(ordersService.getTodayOrderCount());
+    public Result todayCount(@RequestParam(required = false) String dateType) {
+        return Result.success(ordersService.getPeriodOrderCount(dateType));
     }
 
     @GetMapping("/lineWithCount")
-    public Result lineWithCount() {
-        return Result.success(ordersService.selectLineWithCount());
+    public Result lineWithCount(@RequestParam(required = false) String dateType) {
+        return Result.success(ordersService.selectLineWithCountByType(dateType));
     }
 
 }

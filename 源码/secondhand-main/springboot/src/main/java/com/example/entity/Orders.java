@@ -45,8 +45,7 @@ public class Orders implements Serializable {
     private String user;
     private String saleName;
 
-
-
+    private String category;
 
     public String getUser() {
         return user;
@@ -192,6 +191,14 @@ public class Orders implements Serializable {
         this.saleId = saleId;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
     @Override
     public String toString() {
         return "Orders{" +
@@ -213,6 +220,7 @@ public class Orders implements Serializable {
                 ", addressId=" + addressId +
                 ", user='" + user + '\'' +
                 ", saleName='" + saleName + '\'' +
+                ", category='" + category + '\'' +
                 '}';
     }
 }

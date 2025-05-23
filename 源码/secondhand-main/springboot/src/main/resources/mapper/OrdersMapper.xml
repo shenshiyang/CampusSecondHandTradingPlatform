@@ -10,8 +10,9 @@
 
     <select id="selectAll" resultType="com.example.entity.Orders">
         select
-        orders.*, u1.name as user, u2.name as saleName
+        orders.*, g.category as category, u1.name as user, u2.name as saleName
         from orders
+        left join goods g on orders.goods_id = g.id
         left join user u1 on orders.user_id = u1.id
         left join user u2 on orders.sale_id = u2.id
         <where>
@@ -107,5 +108,15 @@
         GROUP BY g.category
     </select>
 
+    <select id="selectCategorySalesCountByRange" resultType="cn.hutool.core.lang.Dict">
+        SELECT g.category AS name, COUNT(*) AS value
+        FROM orders o
+            LEFT JOIN goods g ON o.goods_id = g.id
+        WHERE o.status = '已完成'
+        <if test="startDate != null and endDate != null">
+            AND o.time BETWEEN #{startDate} AND #{endDate}
+        </if>
+        GROUP BY g.category
+    </select>
 
 </mapper>

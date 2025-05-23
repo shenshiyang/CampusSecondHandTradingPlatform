@@ -3,6 +3,7 @@ package com.example.mapper;
 import cn.hutool.core.lang.Dict;
 import com.example.entity.Orders;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -38,6 +39,7 @@ public interface OrdersMapper {
 
     List<Dict> selectCategorySalesCount();
 
+    List<Dict> selectCategorySalesCountByRange(@Param("startDate") String startDate, @Param("endDate") String endDate);
 
     @Select("select * from orders where order_no = #{orderNo}")
     Orders selectByOrderNo(String orderNo);

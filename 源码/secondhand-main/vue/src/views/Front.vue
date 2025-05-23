@@ -72,17 +72,33 @@
     <el-dialog
       title="AI客服"
       :visible.sync="aiDialogVisible"
-      width="500px"
+      width="700px"
       :close-on-click-modal="false"
       custom-class="ai-dialog"
     >
       <div class="ai-chat-container">
         <div class="ai-chat-messages" ref="chatMessages">
+          <div class="ai-history-btn-wrapper">
+            <el-button
+              size="mini"
+              @click="loadAIHistory"
+              :loading="aiHistoryLoading"
+              :disabled="aiMessages.length >= aiHistoryTotal && aiHistoryTotal > 0"
+            >
+              查看历史聊天记录
+            </el-button>
+          </div>
           <div v-for="(msg, index) in aiMessages" :key="index" :class="['message', msg.type]">
             <div class="avatar">
               <img :src="msg.type === 'user' ? user.avatar : 'https://api.dicebear.com/7.x/bottts/svg?seed=ai-assistant'" alt="avatar">
             </div>
-            <div class="content">{{ msg.content }}</div>
+            <div class="content">
+              {{ msg.content }}
+              <div v-if="msg.time" class="msg-time">{{ msg.time | dateFormat }}</div>
+            </div>
+          </div>
+          <div v-if="aiLoading" class="ai-loading">
+            <i class="el-icon-loading"></i> AI客服正在思考中...
           </div>
         </div>
         <div class="ai-chat-input">
@@ -120,6 +136,11 @@ export default {
       aiDialogVisible: false,
       aiInputMessage: '',
       aiMessages: [],
+      aiLoading: false,
+      aiHistoryLoading: false,
+      aiHistoryPage: 1,
+      aiHistorySize: 20,
+      aiHistoryTotal: 0,
     }
   },
   mounted() {
@@ -281,6 +302,8 @@ export default {
     },
     handleAIClick() {
       this.aiDialogVisible = true;
+      this.aiHistoryPage = 1;
+      this.aiHistoryTotal = 0;
       if (this.aiMessages.length === 0) {
         this.aiMessages.push({
           type: 'ai',
@@ -299,6 +322,7 @@ export default {
       
       const userMessage = this.aiInputMessage;
       this.aiInputMessage = '';
+      this.aiLoading = true;
       
       // 滚动到底部
       this.$nextTick(() => {
@@ -311,6 +335,7 @@ export default {
         mode: 'chat',
         userId: this.user.id || 1
       }).then(res => {
+        this.aiLoading = false;
         if (res.code === '200') {
           this.aiMessages.push({
             type: 'ai',
@@ -324,6 +349,7 @@ export default {
           this.$message.error('获取AI回复失败');
         }
       }).catch(err => {
+        this.aiLoading = false;
         console.error(err);
         this.$message.error('获取AI回复失败');
       });
@@ -331,7 +357,35 @@ export default {
     logout() {
       localStorage.removeItem("xm-user")
       this.$router.push("/login")
-    }
+    },
+    async loadAIHistory() {
+      if (!this.user.id) return;
+      this.aiHistoryLoading = true;
+      try {
+        const res = await this.$request.get('/aiChat/history', {
+          params: {
+            userId: this.user.id,
+            page: this.aiHistoryPage,
+            size: this.aiHistorySize
+          }
+        });
+        if (res.code === '200') {
+          const history = (res.data.records || []).map(item => ({
+            type: item.sender,
+            content: item.content,
+            time: item.createTime
+          }));
+          this.aiMessages = history.concat(this.aiMessages);
+          this.aiHistoryTotal = res.data.total;
+          this.aiHistoryPage += 1;
+        } else {
+          this.$message.error('加载历史聊天记录失败');
+        }
+      } catch (e) {
+        this.$message.error('加载历史聊天记录失败');
+      }
+      this.aiHistoryLoading = false;
+    },
   }
 }
 </script>
@@ -636,7 +690,7 @@ export default {
 }
 
 .ai-chat-container {
-  height: 400px;
+  height: 600px;
   display: flex;
   flex-direction: column;
 }
@@ -701,5 +755,31 @@ export default {
 :deep(.ai-dialog .el-dialog__title) {
   font-size: 18px;
   font-weight: 600;
+}
+
+.ai-loading {
+  text-align: center;
+  color: #1890ff;
+  font-size: 16px;
+  margin-top: 10px;
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.msg-time {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.ai-history-btn-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
 }
 </style>

@@ -91,9 +91,8 @@ public class UserController {
 
 
     @GetMapping("/selectOnlineTrend")
-    public Result selectOnlineTrend() {
-        List<Dict> trendData = loginLogService.getOnlineTrend();
+    public Result selectOnlineTrend(@RequestParam(required = false) String dateType) {
+        List<Dict> trendData = loginLogService.getOnlineTrendByType(dateType);
         return Result.success(trendData);
-
     }
 }
